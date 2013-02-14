@@ -38,8 +38,8 @@ App.Canvas = Em.View.extend
   #attributes used to define and render the canvas 
   tagName: "canvas"
   attributeBindings: ['height', 'width']
-  height: "500px"
-  width: "600ox"
+  height: 300 
+  width: 300 
   color1: "blue"
   color2: "orange"
 ```
@@ -73,8 +73,8 @@ App.Canvas = Em.View.extend
   #attributes used to define and render the canvas
   tagName: "canvas"
   attributeBindings: ['height', 'width']
-  height: "500px"
-  width: "600ox"
+  height: 300 
+  width: 300 
   color1: "blue"
   color2: "orange"
   
@@ -117,8 +117,8 @@ App.Canvas = Em.View.extend
   #attributes used to define and render the canvas
   tagName: "canvas"
   attributeBindings: ['height', 'width']
-  height: "500px"
-  width: "600ox"
+  height: 300 
+  width: 300
   color1: "blue"
   color2: "orange"
   
