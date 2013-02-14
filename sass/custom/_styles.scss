@@ -1,2 +1,130 @@
 // This File is imported last, and will override other styles in the cascade
 // Add styles here to make changes without digging in too much
+$res-bg: #333;
+$grey-shadow: $res-bg;
+$red-bg: #B90504;
+$red-shadow: #960303;
+$orange-shadow: #BD3200;
+$yellow-shadow: #B89000;
+$res-text: #EB3F00;
+$res-title: #EBB800;
+$bord-rad: 10px 10px 10px 10px;
+$red-shad: 0px 0px 4px 5px $red-bg;
+$yel-shad: 0px 0px 4px 5px $res-title;
+
+//change article dimensions
+article > footer {
+  padding: .6em .6em .6em .6em;
+}
+
+//styles for resourcelist
+#resources {
+  margin: .6em .6em .6em .6em;
+  background-color: $res-bg;
+  border-radius: $bord-rad;
+ // -moz-box-shadow: inset $yel-shad;
+ // -webkit-box-shadow: inset $yel-shad;
+ // box-shadow: inset $yel-shad;
+
+  header {
+    margin-left: .6em;
+    font-weight: bold;
+    font-size: 1.3em;
+    color: $res-title;
+    padding-top: .5em;
+    padding-bottom: .3em;
+    margin-bottom: 0;
+    a {
+      color: $res-text;
+      text-decoration: none;
+    }
+  } 
+  table {
+    margin-left: .6em;
+    td.resourcetitle {
+      margin-left: .2em;
+      font-size: 1.2em;
+      a {
+        text-decoration: none;
+      }
+      padding-right: 2em; 
+      color: $res-text;
+    } 
+    td.resourcedescription {
+      margin-left: .2em;
+      color: $res-title;
+    }
+  } 
+  footer {
+    margin-left: .6em;
+    color: $res-title;
+    padding-top: .3em;
+    padding-bottom: .5em;
+  }
+}
+
+//hacks for shadows
+div#main {
+  border-radius: $bord-rad;
+  background: none;
+  div#content {
+    border-radius: inherit;
+   //-moz-box-shadow: $yel-shad;
+   //-webkit-box-shadow: $yel-shad;
+   //box-shadow: $yel-shad;
+  }
+}
+footer#sitefooter {
+  margin-top: 2em;
+  border: none;
+  border-radius: $bord-rad;
+  background: none;
+  background-color: $red-bg;
+ //-moz-box-shadow: $red-shad;
+ //-webkit-box-shadow: $red-shad;
+ //box-shadow: $red-shad;
+}
+
+header#siteheader {
+  border-radius: $bord-rad;
+  // box-shadow: $red-shad;
+  //-moz-box-shadow: $red-shad;
+  //-webkit-box-shadow: $red-shad;
+}
+
+nav {
+  margin-bottom: .3em;
+  margin-top: .3em;
+}
+
+//code figure mods
+//remove figure captions (for now)
+figure.code {
+  margin: .6em .6em .6em .6em;
+  border: none;
+  border-radius: $bord-rad; 
+  figcaption {
+    display: none;
+    border: none;
+  }
+  div.highlight {
+    border-radius: inherit;
+    table {
+     //-moz-box-shadow: inset $yel-shad;
+     //-webkit-box-shadow: inset $yel-shad;
+     //box-shadow: inset $yel-shad;
+    }
+  }
+}
+
+footer {
+  border-top: none;
+}
+//dirty hack to remove whitespace
+body div div {
+  border-right: none;
+}
+//remove sidebar completely
+aside {
+  display:none;
+}

@@ -2,11 +2,9 @@ body > nav {
   position: relative;
   background-color: $nav-bg;
   @include background($nav-bg-front, $nav-bg-back);
-  border: {
-    top: 1px solid $nav-border-top;
-    bottom: 1px solid $nav-border-bottom; }
-  padding-top: .35em;
-  padding-bottom: .35em;
+  border: none;
+  padding-top: none;
+  padding-bottom: none;
   form {
     @include background-clip(padding-box);
     margin: 0; padding: 0;
@@ -58,7 +56,7 @@ body > nav {
       text-shadow: lighten($nav-bg, 12) 0 1px;
       float: left;
       text-decoration: none;
-      font-size: 1.1em;
+      font-size: 1.2em;
       padding: .1em 0;
       line-height: 1.5em;
     }
