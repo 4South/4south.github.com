@@ -1,0 +1,166 @@
+---
+layout: post
+title: "Wrapping HTML5 Canvas with Ember View"
+date: 2013-02-14 23:02
+comments: true 
+categories: View 
+author: "Steve Kane"
+published: true 
+---
+##Tune Your Fiddle
+To configure <a href="http://jsfiddle.net">jSFiddle</a> to work with Ember, select **jQuery 1.9.1** as your onLoad Framework.  Add both <a href="https://raw.github.com/emberjs/ember.js/release-builds/ember-1.0.0-pre.4.js">Ember</a> 
+and <a href="https://raw.github.com/wycats/handlebars.js/1.0.rc.2/dist/handlebars.js">Handlebars</a> to your Managed Resources by 
+pasting the exact urls provided in the previous two links into the available form field.<br />
+##Understand The Goal
+###**What is Happening Here ?**
+We are going to use **Ember.View** to wrap an **HTML5 \<canvas\> element**.  This will allow us to use the canvas API to draw shapes/data/whatever while utilizing Ember's data structures, route handlers, and other bells/whistles that make it so great.
+###**See Into the Future !**
+Cheat and check out this <a href="http://jsfiddle.net/skane/NyxkD/2/">Completed Fiddle</a> Or build your <a href="http://jsfiddle.net">Own Fiddle</a> as you learn.
+##Write Minimally Viable Ember Application (that does something)
+```html
+<script type="text/x-handlebars">
+  Text to demonstrate App is functioning
+</script>
+```
+```coffeescript
+window.App = Em.Application.create()
+```
+###**Where's the Router    ? :-/**<br />
+Ember generates a **default router** for us.  We are not changing routes so no need to explicitly declare it ourselves.
+###**Why Define The Template    ? :-/**<br />
+Primarily, we demonstrate our app's validity.  Secondarily, we are going to modify this to be more useful in the next section.
+
+##Construct Canvas View, Modify application Template, Add CSS Border
+```coffeescript
+window.App = Em.Application.create()
+
+App.Canvas = Em.View.extend
+  #attributes used to define and render the canvas 
+  tagName: "canvas"
+  attributeBindings: ['height', 'width']
+  height: "500px"
+  width: "600ox"
+  color1: "blue"
+  color2: "orange"
+```
+{% codeblock lang:html %}
+<script type="text/x-handlebars">
+  Text to demonstrate App is functioning
+  {{ "{{ view 'App.Canvas' " }}}}
+</script>
+{% endcodeblock %}
+```css
+canvas {
+  border: 5px solid black;
+}
+```
+###**What is the Meaning of "view App.Canvas"    ? :-/**
+This will create a new instance of the view **App.Canvas** and render it into the application template.  The view has the same context as the current template 
+(in this case Ember has **automagically generated applicationController**).
+###**And the Attributes    ? :-|**
+**AttributeBindings** is an array of strings that references other attributes on the view.  It creates HTML attributes by those attribute names with the values stored
+in each attribute.  If the attributes change on the view, they will also change in the HTML.  We are using **height** and **width** in this manner and the resulting
+output is shown below.
+```html
+<canvas height="500px" width="400px"></canvas>
+```
+Attributes **color1** and **color2** are going to be used by our application to determine what colors to paint our canvas.  More on that to come...
+##Hook Into DOM Insertion and Design a Fill Method
+```coffeescript
+window.App = Em.Application.create()
+
+App.Canvas = Em.View.extend
+  #attributes used to define and render the canvas
+  tagName: "canvas"
+  attributeBindings: ['height', 'width']
+  height: "500px"
+  width: "600ox"
+  color1: "blue"
+  color2: "orange"
+  
+  #this method is fired when this view's element is inserted in the DOM
+  didInsertElement: () ->
+    @_super()
+    @fill()
+
+  fill: () ->
+    #local variables for clarity
+    halfHeight = @get('height') / 2
+    width = @get "width"
+    c1 = @get "color1"
+    c2 = @get "color2"
+    
+    #draw canvas parameters and methods (basic canvas api)
+    ctx = el.getContext "2d"
+    ctx.fillStyle = c1
+    ctx.fillRect 0, 0, width, halfHeight
+    ctx.fillStyle = c2
+    ctx.fillRect 0, halfHeight, width, halfHeight
+```
+###**What Are These New Methods ?     (╯°□°)╯︵ ┻━┻**
+**didInsertElement** is a method baked into Ember.View that fires when the view's element (in our case, canvas) is inserted into the DOM.
+This method may be overridden to call our **fill** method initially.<br /><br />
+**fill** is a method that we have defined that uses the low-level canvas drawing API to color half the canvas orange
+ and half the canvas blue.  You can easily read about these methods on <a href="http://developer.mozilla.org">MDN</a> or 
+a number of other references.  
+###**Draw Using Any Canvas API You Prefer !     ┬─┬ ノ(゜-゜ノ)**
+You could easily load one of many, many <a href="https://docs.google.com/spreadsheet/ccc?key=0Aqj_mVmuz3Y8dHNhUVFDYlRaaXlyX0xYSTVnalV5ZlE#gid=0">Canvas 2d Libraries</a>
+and use them to draw whatever you want in reaction to DOM events, user interaction, or even animations.
+###**Tell Me More About this...Event Handling ! :-) **
+We can easily use the browser's events such as **click**, **doubleClick**, **mouseEnter** etc to bind functions on our view to those events.  Ember provides method hooks
+for these events with obvious names.  A complete list of these is found <a href="https://emberjs.com/api/classes/Ember.View.html">Here</a>.
+##I Hold Tight To Your Hand As We Step Into This Brave New World
+```coffeescript
+window.App = Em.Application.create()
+
+App.Canvas = Em.View.extend
+  #attributes used to define and render the canvas
+  tagName: "canvas"
+  attributeBindings: ['height', 'width']
+  height: "500px"
+  width: "600ox"
+  color1: "blue"
+  color2: "orange"
+  
+  #this method is fired when this view's element is inserted in the DOM
+  didInsertElement: () ->
+    @_super()
+    @fill()
+
+  fill: () ->
+    #local variables for clarity
+    halfHeight = @get('height') / 2
+    width = @get "width"
+    c1 = @get "color1"
+    c2 = @get "color2"
+    
+    #draw canvas parameters and methods (basic canvas api)
+    ctx = el.getContext "2d"
+    ctx.fillStyle = c1
+    ctx.fillRect 0, 0, width, halfHeight
+    ctx.fillStyle = c2
+    ctx.fillRect 0, halfHeight, width, halfHeight
+    
+    #click event handler
+    click: (event)->
+      c1 = @get "color1"
+      c2 = @get "color2"
+      @set "color1", c2
+      @set "color2", c1
+      @fill()
+```
+###**Click the Box Repeatedly To Feel that <a href="http://www.illinois.edu">Illini Pride</a>**
+Our **click** event handles all browser click events that target our **canvas** and swaps the colors before calling **fill** again.  
+Consider what else you might do with such an event handler: <br />
+1.  **mouseMove** could be used to capture mouse coordinates and draw directly onto the canvas<br />
+2.  **keyDown** could be used to capture keys and output printed text in the canvas<br />
+3.  **etc etc etc**<br />
+If you make an interesting feature and would like to share your fiddle, shoot me a tweet and I'll append your fiddle to this blog post for others to learn from.
+
+##En Futuro
+###**Explore Options for Nested Canvas Elements**
+Nested canvas elements may be used as overlays on top of classical HTML elements which allows you to blend per-pixel drawing with standard HTML/CSS skills.
+###**Explore Options for Using Advanced Canvas APIs**
+Advaned canvas APIs offer greater flexibility and higher-level abstractions useful for quickly producing impressive results.
+###**Explore Options for Rendering Using WebGL (2d/3d)**
+WebGL is the bees knees and Ember.js has potential to weave together the rendering power of WebGL with Ember's data management systems.  **Ermagerd...werb GR ER**

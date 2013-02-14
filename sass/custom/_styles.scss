@@ -16,6 +16,16 @@ $yel-shad: 0px 0px 4px 5px $res-title;
 article > footer {
   padding: .6em .6em .6em .6em;
 }
+//Style changes for entries
+div.entry-content {
+  h3 {
+  color: $red-bg;
+  }
+  a:hover {
+    color: $res-bg;
+  }
+}
+
 
 //styles for resourcelist
 #resources {
