@@ -7,10 +7,6 @@ categories: View
 author: "Steve Kane"
 published: true 
 ---
-##Tune Your Fiddle
-To configure <a href="http://jsfiddle.net">jSFiddle</a> to work with Ember, select **jQuery 1.9.1** as your onLoad Framework.  Add both <a href="https://raw.github.com/emberjs/ember.js/release-builds/ember-1.0.0-pre.4.js">Ember</a> 
-and <a href="https://raw.github.com/wycats/handlebars.js/1.0.rc.2/dist/handlebars.js">Handlebars</a> to your Managed Resources by 
-pasting the exact urls provided in the previous two links into the available form field.<br />
 ##Understand The Goal
 ###**What is Happening Here ?**
 We are going to use **Ember.View** to wrap an **HTML5 \<canvas\> element**.  This will allow us to use the canvas API to draw shapes/data/whatever while utilizing Ember's data structures, route handlers, and other bells/whistles that make it so great.

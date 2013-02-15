@@ -6,6 +6,7 @@ url: http://stevekane.github.com
 title: Trial By Fire 
 presenter: 4-South Studios 
 subtitle: Learn Ember.js by Clear Example 
+twitterplug: Follow @stv_kn for New Articles
 author: Steve Kane 
 description: Ember.js Tips by Example
 
@@ -70,8 +71,8 @@ googleplus_user: kanesteven@gmail.com
 googleplus_hidden: false
 
 # Disqus Comments
-disqus_short_name:
-disqus_show_comment_count: false
+disqus_short_name: trialbyfire
+disqus_show_comment_count: true
 
 # Facebook Like
 facebook_like: true 

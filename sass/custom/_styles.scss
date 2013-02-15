@@ -1,16 +1,4 @@
-// This File is imported last, and will override other styles in the cascade
-// Add styles here to make changes without digging in too much
-$res-bg: #333;
-$grey-shadow: $res-bg;
-$red-bg: #B90504;
-$red-shadow: #960303;
-$orange-shadow: #BD3200;
-$yellow-shadow: #B89000;
-$res-text: #EB3F00;
-$res-title: #EBB800;
 $bord-rad: 10px 10px 10px 10px;
-$red-shad: 0px 0px 4px 5px $red-bg;
-$yel-shad: 0px 0px 4px 5px $res-title;
 
 //change article dimensions
 article > footer {
@@ -18,58 +6,90 @@ article > footer {
 }
 //Style changes for entries
 div.entry-content {
+  p {
+    color: $color1;
+    margin-bottom: .3em;
+  }
   h3 {
-  color: $red-bg;
+    font-weight: normal;
+    color: $color4;
+    margin-bottom: .3em;
   }
   a:hover {
-    color: $res-bg;
+    color: $color1;
+    text-decoration: none;
   }
 }
 
 
-//styles for resourcelist
-#resources {
-  margin: .6em .6em .6em .6em;
-  background-color: $res-bg;
-  border-radius: $bord-rad;
- // -moz-box-shadow: inset $yel-shad;
- // -webkit-box-shadow: inset $yel-shad;
- // box-shadow: inset $yel-shad;
-
-  header {
-    margin-left: .6em;
-    font-weight: bold;
-    font-size: 1.3em;
-    color: $res-title;
-    padding-top: .5em;
-    padding-bottom: .3em;
-    margin-bottom: 0;
-    a {
-      color: $res-text;
-      text-decoration: none;
-    }
-  } 
-  table {
-    margin-left: .6em;
-    td.resourcetitle {
-      margin-left: .2em;
-      font-size: 1.2em;
-      a {
-        text-decoration: none;
+#content {
+  div, div.blog-index {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    article {
+      padding-top: 0;
+      margin: 0;
+      header{
+        padding-top: 0; 
+        margin: 0;
+        h1.entry-title {
+          a:hover {
+            color: $color2;
+            text-decoration: none;
+          }
+        }
+        #resources {
+          margin: .6em;
+          background-color: $res-bg;
+          border-radius: $bord-rad;
+          summary {
+            margin-left: .6em;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: $res-text;
+            padding-top: .5em;
+            padding-bottom: .3em;
+            margin-bottom: 0;
+            a {
+              color: $res-link;
+              text-decoration: none;
+            }
+          } 
+          table {
+            width: 95%;
+            margin-left: .6em;
+            td.resourcetitle {
+              width: 150px;
+              vertical-align: top;
+              padding-left: .5em;
+              padding-right: .5em;
+              font-size: .9em;
+              a {
+                text-decoration: none;
+              }
+              padding-right: 2em; 
+              color: $res-link;
+            } 
+            td.resourcedescription {
+              div.url {
+                color: $res-link;
+              }
+              vertical-align: top;
+              font-size: .9em;
+              margin-left: .2em;
+              
+              color: $res-text;
+            }
+          } 
+          footer {
+            margin-left: .6em;
+            color: $res-text;
+            padding-top: .3em;
+            padding-bottom: .5em;
+          }
+        }
       }
-      padding-right: 2em; 
-      color: $res-text;
-    } 
-    td.resourcedescription {
-      margin-left: .2em;
-      color: $res-title;
     }
-  } 
-  footer {
-    margin-left: .6em;
-    color: $res-title;
-    padding-top: .3em;
-    padding-bottom: .5em;
   }
 }
 
@@ -79,32 +99,44 @@ div#main {
   background: none;
   div#content {
     border-radius: inherit;
-   //-moz-box-shadow: $yel-shad;
-   //-webkit-box-shadow: $yel-shad;
-   //box-shadow: $yel-shad;
   }
 }
 footer#sitefooter {
   margin-top: 2em;
+  margin-bottom: 0;
   border: none;
-  border-radius: $bord-rad;
+  border-radius: 0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   background: none;
-  background-color: $red-bg;
- //-moz-box-shadow: $red-shad;
- //-webkit-box-shadow: $red-shad;
- //box-shadow: $red-shad;
+  background-color: $color4;
 }
 
 header#siteheader {
-  border-radius: $bord-rad;
-  // box-shadow: $red-shad;
-  //-moz-box-shadow: $red-shad;
-  //-webkit-box-shadow: $red-shad;
+  vertical-align: center;
+  background-image: url('../images/demoncolor.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: 90%;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  height: 150px;
+  h3 {
+    padding-top: 30px;
+    color: $color3;
+    font-size: .8em;
+    font-weight: normal;
+  }
 }
 
 nav {
   margin-bottom: .3em;
   margin-top: .3em;
+  ul li a {
+    font-weight: bold;
+    font-size: 1.4em;
+    font-family: "PT Serif", "Georgia", "Helvetica Neue", Arial, sans-serif;
+  }
 }
 
 //code figure mods
@@ -119,11 +151,6 @@ figure.code {
   }
   div.highlight {
     border-radius: inherit;
-    table {
-     //-moz-box-shadow: inset $yel-shad;
-     //-webkit-box-shadow: inset $yel-shad;
-     //box-shadow: inset $yel-shad;
-    }
   }
 }
 
