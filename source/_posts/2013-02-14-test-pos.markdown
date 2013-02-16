@@ -58,7 +58,7 @@ This will create a new instance of the view **App.Canvas** and render it into th
 in each attribute.  If the attributes change on the view, they will also change in the HTML.  We are using **height** and **width** in this manner and the resulting
 output is shown below.
 ```html
-<canvas height="500px" width="400px"></canvas>
+<canvas height="300" width="300"></canvas>
 ```
 Attributes **color1** and **color2** are going to be used by our application to determine what colors to paint our canvas.  More on that to come...
 ##Hook Into DOM Insertion and Design a Fill Method
