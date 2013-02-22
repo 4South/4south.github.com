@@ -13,7 +13,7 @@ This post was built with Ember.js 1.0.0RC1, handlebars RC3, and jQuery 1.9.1
 Our goal is to use Ember's **ContainerView** class to wrap up **multiple HTML5 canvas elements** into a single, layered display.  This pattern is extremely
 common for effective use of canvas elements and Ember offers an elegant solution for encapsulating them as a "unit".
 ###Show me the end product before I listen...
-Feel free to check out this <a href="https://jsfiddle.net/skane/msvDW/34/">Completed Fiddle</a> or build your own fiddle as we go.
+Feel free to check out this <a href="http://jsfiddle.net/skane/msvDW/34/">Completed Fiddle</a> or build your own fiddle as we go.
 ##Separating Signals and Noise
 This project, and many that follow require some "support" code to achieve the end goal.  Often times that code is not germane to the point the article is trying
 to make about Ember.js.
