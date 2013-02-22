@@ -23,7 +23,7 @@ Dynamic styling using computed properties<br />
 Initial Canvas drawing and re-rendering<br />
 ###Noise
 Buttons to change linecount and supporting behavior validation<br />
-Local variable setup (an unfortunate necessity in Ember..)<br />
+Local variable setup<br />
 Methods for drawing to canvas (these are worth exploring but don't directly convey our purpose here)<br />
 ##Ember setup
 ```coffeescript
@@ -93,7 +93,7 @@ App.CompositeView = Ember.ContainerView.extend
 This View is now complete and will not change for the rest of this post.  We have added a **computed property called "style"** to the view which constructs a string of 
 in-line styles to be added onto the view's element, "div", via the **attributeBindings** attribute.  Read <a href="http://emberjs.com/api/classes/Ember.View.html">
 Ember's View API</a> for more information on how these attributes work.<br />
-**NOTE:** This is not the only way to style an element but it showcases a method that will allow us to **dynamically re-size our view** if the view's content.height or content.width are changed by our application.
+**NOTE: This is not the only way to style an element but it showcases a method that will allow us to dynamically re-size our view if the view's content.height or content.width are changed by our application.**
 ```coffeescript
 App.Canvas = Ember.View.extend
     tagName: "canvas"
@@ -185,7 +185,7 @@ App.Canvas = Ember.View.extend
 ```
 This class is now finished and will not change for the rest of this post.<br />
 This code looks a little dense but its purpose is very simple.  It draws **horizontal** or **vertical** stripes onto our canvases using the low-level canvas API's methods.  It is easy to google these methods so I will not explain them here.  The rest of the lines are dedicated to calculating x,y,height, and width based on our view's content (which is inherited from applicationController.appVars).  **Feel free to tweet, email, or comment below if any of this is unclear**.  <br />
-**NOTE: ** Be sure to remove the "return" we had listed in the fill method initially.  It was only there as filler.<br />
+**NOTE: Be sure to remove the "return" we had listed in the fill method initially.  It was only there as filler.**<br />
 Finally, we also implement an Ember observer called **layoutChanged which fires any time content.lineCount, content.height, or content.width change**.  We use this to signal to our canvas that it must re-draw itself.  We don't need to clear the canvas in this particular app because our draw process completely re-draws the whole canvas.  **This may not always be the case!**
 ##Dynamically re-draw our canvas by changing lineCount!
 ```coffeescript
