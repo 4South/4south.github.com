@@ -1,5 +1,9 @@
 $bord-rad: 10px 10px 10px 10px;
-
+@mixin userSelect {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
 //change article dimensions
 article > footer {
   padding: .6em .6em .6em .6em;
@@ -39,10 +43,12 @@ div.entry-content {
           }
         }
         #resources {
+          @include userSelect;
           margin: .6em;
           background-color: $res-bg;
           border-radius: $bord-rad;
           summary {
+            @include userSelect;
             margin-left: .6em;
             font-weight: bold;
             font-size: 1.3em;
@@ -71,7 +77,7 @@ div.entry-content {
               color: $res-link;
             } 
             td.resourcedescription {
-              div.url {
+              p.url {
                 color: $res-link;
               }
               vertical-align: top;
