@@ -12,7 +12,7 @@ The code for this post is built with Ember.js 1.0.0-RC1, handlebars RC3, and jQu
 ##Objective
 We will see how the **Ember.View** updates when changing the model properties using mouse event coordinates. The end result is drawing a box which is an **Ember.Object** using click and drag.
 ###Demo
-This jsFiddle demonstrates the end result: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a>.
+This jsFiddle demonstrates the end result: <a href="http://jsfiddle.net/chen_pete/5m95y/10/">Completed Fiddle</a>.
 Click on the gray box and hold down the mouse button. Drag to create and update a box object.
 
 ##Ember Application Setup
@@ -67,11 +67,15 @@ App.ApplicationView = Ember.View.extend
     
     #EVENTS below
     mouseDown: (event)->
+        viewOffsetLeft = @$().offset().left
+        viewOffsetTop = @$().offset().top
         boxCon = @get('controller.controllers.box')
-        boxCon.set('initialX', event.offsetX)
-        boxCon.set('initialY', event.offsetY)       
-        boxCon.createBox(event.offsetX, event.offsetY)    
-    
+        X = event.pageX - viewOffsetLeft
+        Y =  event.pageY - viewOffsetTop
+        
+        boxCon.set('initialX', X)
+        boxCon.set('initialY', Y)
+        boxCon.createBox(X, Y)
     #calculate view offsets to get accurate click positions
     mouseMove: (event)->
         viewOffsetLeft = @$().offset().left
@@ -154,7 +158,7 @@ App.BoxView = Ember.View.extend
 ```
 
 ###Improving the System
-Here is the working jsFiddle showing the results of this demo: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a><br/><br/>
+Here is the working jsFiddle showing the results of this demo: <a href="http://jsfiddle.net/chen_pete/5m95y/10/">Completed Fiddle</a><br/><br/>
 What can we improve? Currently, during the box update there is a flag on the controller called 'isUpdating' which is set to true, then when
 the update ends this flag is set to false. We could run into problems in the future if we add more features and forget what this flag is for.
 Then we could run into some crazy behavior since those mouse events are still firing when we move the mouse. A better solution might be to use
