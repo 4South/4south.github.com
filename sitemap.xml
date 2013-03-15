@@ -2,28 +2,34 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://stevekane.github.com/blog/2013/02/14/test-pos/</loc>
-        <lastmod>2013-03-15T02:27:16-05:00</lastmod>
+        <lastmod>2013-03-15T03:16:15-05:00</lastmod>
     </url>
     <url>
         <loc>
             http://stevekane.github.com/blog/2013/02/22/layered-canvases-with-css-extraction/
         </loc>
-        <lastmod>2013-03-15T02:27:16-05:00</lastmod>
+        <lastmod>2013-03-15T03:16:15-05:00</lastmod>
     </url>
     <url>
-        <loc>http://stevekane.github.com/blog/2013/03/13/dynamic-ember-view-updating/</loc>
-        <lastmod>2013-03-15T02:34:04-05:00</lastmod>
+        <loc>
+            http://stevekane.github.com/blog/2013/03/07/creating-an-app-wide-pagination-tracker/
+        </loc>
+        <lastmod>2013-03-15T03:16:15-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://stevekane.github.com/blog/2013/03/13/dynamic-selection-box/</loc>
+        <lastmod>2013-03-15T03:16:15-05:00</lastmod>
     </url>
     <url>
         <loc>http://stevekane.github.com/blog/archives/</loc>
-        <lastmod>2013-03-15T02:34:04-05:00</lastmod>
+        <lastmod>2013-03-15T03:16:15-05:00</lastmod>
     </url>
     <url>
         <loc>http://stevekane.github.com/</loc>
-        <lastmod>2013-03-15T02:34:04-05:00</lastmod>
+        <lastmod>2013-03-15T03:16:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://stevekane.github.com/robots.txt</loc>
-        <lastmod>2013-03-15T02:27:16-05:00</lastmod>
+        <lastmod>2013-03-15T03:16:16-05:00</lastmod>
     </url>
 </urlset>

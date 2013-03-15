@@ -1,0 +1,509 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Creating an App-Wide Pagination Tracker - Trial By Fire</title>
+  <meta name="author" content="Steve Kane (@stv_kn)">
+
+  
+  <meta name="description" content="Dependency versions This post was built with Ember.js 1.0.0RC1, handlebars RC3, and jQuery 1.9.1 Understand the goal What is the point? Recently, I &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://stevekane.github.com/blog/2013/03/07/creating-an-app-wide-pagination-tracker/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="" rel="alternate" title="Trial By Fire" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <header role="banner" id="siteheader"><hgroup>
+  <h1><a href="/">Trial By Fire</a></h1>
+  
+    <h2>Learn Ember.js by Clear Example</h2>
+  
+  
+    <h3>Follow @stv_kn for New Articles</h3>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><!--
+<ul class="subscription" data-subscription="rss">
+  <li><a href="" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+-->
+<ul class="main-navigation">
+  <li><a href="/blog/archives">Ember Blogs</a></li>
+  <li><a href="https://twitter.com/stv_kn" data-show-count="false">@stv_kn</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></li>
+  <li><a href="https://twitter.com/chen_pete" data-show-count="false">@chen_pete</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></li>
+  <li><a href="https://github.com/emberjs/ember.js">Ember</a></li>
+  <li><a href="https://github.com/emberjs/data">EmberData</a></li>
+  <li><a href="http://jsFiddle.net">jSfiddle</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    <section id="resources">
+<details>
+  <summary>Wtf is <a href="http://emberjs.com/">Ember.js</a> and How Do I Use this Blog</summary>
+  <content>
+    <table id="resource table">
+      <tbody>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://stevekane.github.com">This Blog</a>
+          </td>
+          <td class="resourcedescription">
+            Teaches Ember.js through advanced examples not found in introductory material.
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://emberjs.com">Ember</a>
+          </td>
+          <td class="resourcedescription">
+            A Javascript MVC framework for complex client-side web applications. 
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://github.com/emberjs/data">Ember Data</a>
+          </td>
+          <td class="resourcedescription">
+            A persistance and relation-based object system for Ember.js.
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://jsfiddle.net">JSFiddle</a>
+          </td>
+          <td class="resourcedescription">
+            Browser-based Web-development "playground" app.  <a href="http://emberplay.com">EmberPlay.com</a> and <a href="http://jsbin.com">JSBin.com</a> are other similar tools.<br>
+            To set up JSfiddle, add jQuery 1.9.1 to the onLoad Framework.  Add these two urls to your Managed Resources:
+            <p class="url">https://raw.github.com/emberjs/ember.js/release-builds/ember-1.0.0-rc.1.js</p>
+            <p class="url">https://raw.github.com/wycats/handlebars.js/1.0.0-rc.3/dist/handlebars.js</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </content>
+</details>
+</section>
+
+    <section id="resources">
+  <details>
+  <summary>Shortlist of Valuable Resources for <a href="http://emberjs.com">Emberjs</a> Developers</summary>
+  <content>
+    <table id="resource table">
+      <tbody>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://peepcode.com/products/emberjs">PeepCode $</a>
+          </td>
+          <td class="resourcedescription">
+            PeepCode's Emberjs tutorial costs $12 bucks but is worth every penny
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://toranbillups.com/blog/">Toran Billups</a>
+          </td>
+          <td class="resourcedescription">
+            Toran has the best intro-to-ember materials around...in my opinion.
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://darthdeus.github.com">DarthDeus</a>
+          </td>
+          <td class="resourcedescription">
+            DarthDeus explains many of Ember's major systems
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://kaspertidemann.com">Kasper Tidemann</a>
+          </td>
+          <td class="resourcedescription">
+            Kasper's blog is short and sweet and includes helpful links and tutorials
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </content>
+  <footer>Contact <a href="https://twitter.com/stv_kn">stv_kn</a> to add your site.</footer>
+</details>
+</section>
+
+    
+      <h1 class="entry-title">Creating an App-Wide Pagination Tracker</h1>
+    
+    
+      <h6 class="meta">
+        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Steve Kane (@stv_kn)</span></span>
+
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-07T01:44:00-06:00" pubdate data-updated="true">Mar 7<span>th</span>, 2013</time>
+        
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/application/'>Application</a>
+  
+</span>
+
+
+      </h6>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Dependency versions</h2>
+
+<p>This post was built with Ember.js 1.0.0RC1, handlebars RC3, and jQuery 1.9.1</p>
+
+<h2>Understand the goal</h2>
+
+<h3>What is the point?</h3>
+
+<p>Recently, I was discussing a mechanism for storing json metadata in an Ember application and that thought experiment led me to this possible solution.  We will build a simple jSfiddle that demonstrates a possible solution to this problem that utilizes several interesting Ember-isms including <strong>injections, simulated Ajax with the Runloop, and the didInsertElement hook on Ember.Views</strong>.</p>
+
+<h3>Show me this&#8230;fiddle</h3>
+
+<p>Feel free to check out this <a href="http://jsfiddle.net/skane/sLubH/12/">Completed Fiddle</a> or build your own fiddle as we go.</p>
+
+<h2>Ember application setup and a custom initializer!</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#we want this object made as a singleton injected on controllers/routes/store</span>
+</span><span class='line'><span class="nv">App.PaginationTracker = </span><span class="nx">Ember</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">shitHasChanged: </span><span class="kc">false</span>
+</span><span class='line'>    <span class="nv">model1pagination: </span><span class="mi">5</span>
+</span><span class='line'>    <span class="nv">model2pagination: </span><span class="mi">10</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#read about these...they are awesome.  Check the Ember source</span>
+</span><span class='line'><span class="nx">Ember</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">initializer</span>
+</span><span class='line'>    <span class="nv">name: </span><span class="s">&quot;pagetracker&quot;</span>
+</span><span class='line'>    <span class="nv">initialize: </span><span class="nf">(container, application) -&gt;</span>
+</span><span class='line'>        <span class="c1">#declare that we want a single instance of pagetracker app-wide</span>
+</span><span class='line'>        <span class="nx">container</span><span class="p">.</span><span class="nx">optionsForType</span><span class="p">(</span><span class="s">&#39;pagetracker&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nv">singleton: </span><span class="kc">true</span><span class="p">})</span>
+</span><span class='line'>        <span class="c1">#register our pagetracker singleton with the container </span>
+</span><span class='line'>        <span class="nx">container</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s">&#39;pagetracker&#39;</span><span class="p">,</span> <span class="s">&#39;main&#39;</span><span class="p">,</span> <span class="nx">application</span><span class="p">.</span><span class="nx">PaginationTracker</span><span class="p">)</span>
+</span><span class='line'>        <span class="c1">#inject pagetracker onto all controllers/routes and the store</span>
+</span><span class='line'>        <span class="nx">container</span><span class="p">.</span><span class="nx">typeInjection</span><span class="p">(</span><span class="s">&#39;controller&#39;</span><span class="p">,</span> <span class="s">&#39;pagetracker&#39;</span><span class="p">,</span> <span class="s">&#39;pagetracker:main&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">container</span><span class="p">.</span><span class="nx">typeInjection</span><span class="p">(</span><span class="s">&#39;route&#39;</span><span class="p">,</span> <span class="s">&#39;pagetracker&#39;</span><span class="p">,</span> <span class="s">&#39;pagetracker:main&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">container</span><span class="p">.</span><span class="nx">injection</span><span class="p">(</span><span class="s">&#39;store:main&#39;</span><span class="p">,</span> <span class="s">&#39;pagetracker&#39;</span><span class="p">,</span> <span class="s">&#39;pagetracker:main&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>What the &#8230; is all this mess?</h3>
+
+<p>Don&#8217;t worry this is easy!  It just looks messy because you are a hopeless
+minimalist obsessing over LOC control.  Remember the goal was to <strong>inject</strong>
+a single instance of our new <strong>paginationtracker</strong> object onto all controllers,
+routes, and the store so that we can use the data to affect our displays.<br />
+First, we create an app and define our PaginationTracker object by extending Ember.Object.<br />
+Second, we create a custom <strong>Ember.Application.initializer</strong> to handle our
+injection.  Read more about this awesome functionality at
+<a href="https://github.com/emberjs/ember.js/blob/v1.0.0-rc.1/packages/ember-application/lib/system/application.js#L100">Ember Application Source</a><br>
+We now have an Ember application with the setup desired&#8230;sadly we can see
+no proof that my claims are valid.  Let&#8217;s fix that!</p>
+
+<h2>Fake ajax with Ember.run to change paginationtracker</h2>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">h4</span><span class="o">&gt;</span><span class="nx">model1pagination</span> <span class="nx">is</span> <span class="o">:</span> <span class="p">{{</span><span class="nx">pagetracker</span><span class="p">.</span><span class="nx">model1pagination</span><span class="p">}}</span><span class="o">&lt;</span><span class="err">/h4&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">h4</span><span class="o">&gt;</span><span class="nx">model2pagination</span> <span class="nx">is</span> <span class="o">:</span> <span class="p">{{</span><span class="nx">pagetracker</span><span class="p">.</span><span class="nx">model2pagination</span><span class="p">}}</span><span class="o">&lt;</span><span class="err">/h4&gt;</span>
+</span><span class='line'>    <span class="p">{{</span><span class="err">#</span><span class="k">if</span> <span class="nx">pagetracker</span><span class="p">.</span><span class="nx">shitHasChanged</span><span class="p">}}</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="nx">Pagination</span> <span class="nx">Changed</span><span class="o">!</span>  <span class="nx">Infront</span> <span class="nx">of</span> <span class="nx">your</span> <span class="nx">eyes</span><span class="o">!&lt;</span><span class="err">/h2&gt;</span>
+</span><span class='line'>    <span class="p">{{</span><span class="err">/if}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Quick explanation</h3>
+
+<p>We are using the default template (not named explicitly because Ember will
+automagically name it &#8220;application&#8221; for us).  We want to display model1pagination
+and model2pagination from an attribute called &#8220;pagetracker&#8221; (our pagination
+tracker singleton that we just <strong>injected onto all controllers</strong>) on our
+application controller.<br /><br/>
+Finally, we show a little message if our data has changed (just for
+fun, though this value is ALSO stored on the paginationtracker).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.ApplicationController = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="c1">#fake ajax method</span>
+</span><span class='line'>    <span class="nv">getMyTotallyFakeAjaxData: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="c1">#here we fire our fake ajax call using Ember.run.later (a sort of</span>
+</span><span class='line'>        <span class="c1">#replacement for setTimeout</span>
+</span><span class='line'>        <span class="nx">Ember</span><span class="p">.</span><span class="nx">run</span><span class="p">.</span><span class="nx">later</span><span class="p">(</span><span class="nx">@</span><span class="p">,</span> <span class="nx">@updatePageTracker</span><span class="p">,</span> <span class="mi">4000</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#fake ajax &quot;callback&quot;</span>
+</span><span class='line'>    <span class="nv">updatePageTracker: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="c1">#set properties on our pagetracker singleton through this controller</span>
+</span><span class='line'>        <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;pagetracker&#39;</span><span class="p">).</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;model1pagination&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;pagetracker&#39;</span><span class="p">).</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;model2pagination&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;pagetracker&#39;</span><span class="p">).</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;shitHasChanged&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.ApplicationView = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="c1">#engage our controller&#39;s fake ajax call when this view is inserted in the DOM</span>
+</span><span class='line'>    <span class="nv">didInsertElement: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>        <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;controller&#39;</span><span class="p">).</span><span class="nx">getMyTotallyFakeAjaxData</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>This is cool&#8230;what is it?</h3>
+
+<p>We want our view to fire off a &#8220;fake ajax-y method&#8221; on our controller when it
+is first inserted into the DOM.  The initial pagination values are displayed
+for 4 seconds before they are replaced by updated values.</p>
+
+<h3>Go home point-of-this-article&#8230;you&#8217;re drunk</h3>
+
+<p>The key thing to understand from this code is that we are accessing a singleton
+instance of our <strong>paginationtracker</strong> through our applicationController
+thanks to our clever injection!  <br />
+We can update its properties and then use standard handlebars lookup paths to
+access that object to display its current attribute values.  This is wonderful
+as we could now use these values in any controller, route, or even directly
+on the store to make decisions about our application&#8217;s behavior.  <br />
+yay!</p>
+
+<h3>Unsolicited opinion</h3>
+
+<p>Ember is really not hard once you learn to stop fighting it and instead LEVERAGE
+its conventions to achieve world domination&#8230;like Zuckerberg..but cooler.</p>
+
+<h2>Upcoming blogs (omg see the future)</h2>
+
+<p>I want to explore some more advanced Ember use-cases including <strong>undo/redo, animation, and extracting view attributes from CSS stylesheets (black.fuckin.magic)</strong>.
+As always, follow @stv_kn for updates on stuff and links to useful fiddles.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Steve Kane (@stv_kn)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-07T01:44:00-06:00" pubdate data-updated="true">Mar 7<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/application/'>Application</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://stevekane.github.com/blog/2013/03/07/creating-an-app-wide-pagination-tracker/" data-via="stv_kn" data-counturl="http://stevekane.github.com/blog/2013/03/07/creating-an-app-wide-pagination-tracker/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/02/22/layered-canvases-with-css-extraction/" title="Previous Post: Layering Canvases with Ember.ContainerView">&laquo; Layering Canvases with Ember.ContainerView</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/03/13/dynamic-selection-box/" title="Next Post: Dynamic Ember View Updating">Dynamic Ember View Updating &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Peanut Gallery (with affection)</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" id="sitefooter"><p>
+  Copyright &copy; 2013 - 4South Studios -  
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'trialbyfire';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://stevekane.github.com/blog/2013/03/07/creating-an-app-wide-pagination-tracker/';
+        var disqus_url = 'http://stevekane.github.com/blog/2013/03/07/creating-an-app-wide-pagination-tracker/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
