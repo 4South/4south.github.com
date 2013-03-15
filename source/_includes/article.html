@@ -8,9 +8,11 @@
       <h1 class="entry-title">{% if site.titlecase %}{{ page.title | titlecase }}{% else %}{{ page.title }}{% endif %}</h1>
     {% endif %}
     {% unless page.meta == false %}
-      <p class="meta">
-        <!--{% include post/date.html %}{{ time }}-->
-      </p>
+      <h6 class="meta">
+        {% include post/author.html %}
+        {% include post/date.html %}{% if updated %}{{ updated }}{% else %}{{ time }}{% endif %}
+        {% include post/categories.html %}
+      </h6>
     {% endunless %}
   </header>
 {% endunless %}
