@@ -4,7 +4,7 @@
   <title><![CDATA[Category: View | Trial By Fire]]></title>
   <link href="http://stevekane.github.com/blog/categories/view/atom.xml" rel="self"/>
   <link href="http://stevekane.github.com/"/>
-  <updated>2013-03-15T03:17:41-05:00</updated>
+  <updated>2013-03-15T03:20:29-05:00</updated>
   <id>http://stevekane.github.com/</id>
   <author>
     <name><![CDATA[Steve Kane (@stv_kn)]]></name>
@@ -28,7 +28,7 @@
 
 <h3>Demo</h3>
 
-<p>This jsFiddle demonstrates the end result: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a>.
+<p>This jsFiddle demonstrates the end result: <a href="http://jsfiddle.net/chen_pete/5m95y/10/">Completed Fiddle</a>.
 Click on the gray box and hold down the mouse button. Drag to create and update a box object.</p>
 
 <h2>Ember Application Setup</h2>
@@ -122,11 +122,15 @@ The **needs** property lists other controllers so that you can access them from 
 
 #EVENTS below
 mouseDown: (event)-&gt;
+    viewOffsetLeft = @$().offset().left
+    viewOffsetTop = @$().offset().top
     boxCon = @get('controller.controllers.box')
-    boxCon.set('initialX', event.offsetX)
-    boxCon.set('initialY', event.offsetY)       
-    boxCon.createBox(event.offsetX, event.offsetY)    
+    X = event.pageX - viewOffsetLeft
+    Y =  event.pageY - viewOffsetTop
 
+    boxCon.set('initialX', X)
+    boxCon.set('initialY', Y)
+    boxCon.createBox(X, Y)
 #calculate view offsets to get accurate click positions
 mouseMove: (event)-&gt;
     viewOffsetLeft = @$().offset().left
@@ -224,7 +228,7 @@ style: (-&gt;
 
 <h3>Improving the System</h3>
 
-<p>Here is the working jsFiddle showing the results of this demo: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a><br/><br/>
+<p>Here is the working jsFiddle showing the results of this demo: <a href="http://jsfiddle.net/chen_pete/5m95y/10/">Completed Fiddle</a><br/><br/>
 What can we improve? Currently, during the box update there is a flag on the controller called 'isUpdating' which is set to true, then when
 the update ends this flag is set to false. We could run into problems in the future if we add more features and forget what this flag is for.
 Then we could run into some crazy behavior since those mouse events are still firing when we move the mouse. A better solution might be to use
