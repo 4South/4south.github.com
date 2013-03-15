@@ -4,7 +4,8 @@ title: "Layering Canvases with Ember.ContainerView"
 date: 2013-02-22 01:30
 comments: true
 categories: View 
-published: true 
+published: true
+author: "Steve Kane (@stv_kn)"
 ---
 ##Dependency Versions
 This post was built with Ember.js 1.0.0RC1, handlebars RC3, and jQuery 1.9.1

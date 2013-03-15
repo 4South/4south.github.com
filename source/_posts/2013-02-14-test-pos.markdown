@@ -4,7 +4,7 @@ title: "Wrapping HTML5 Canvas with Ember View"
 date: 2013-02-14 23:02
 comments: true 
 categories: View 
-author: "Steve Kane"
+author: "Steve Kane (@stv_kn)"
 published: true 
 ---
 ##Dependency Versions
