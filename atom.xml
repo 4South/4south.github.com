@@ -1,0 +1,1262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Trial By Fire]]></title>
+  <link href="http://stevekane.github.com/atom.xml" rel="self"/>
+  <link href="http://stevekane.github.com/"/>
+  <updated>2013-03-15T02:34:47-05:00</updated>
+  <id>http://stevekane.github.com/</id>
+  <author>
+    <name><![CDATA[Steve Kane (@stv_kn)]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Dynamic Ember View Updating]]></title>
+    <link href="http://stevekane.github.com/blog/2013/03/13/dynamic-selection-box/"/>
+    <updated>2013-03-13T22:40:00-05:00</updated>
+    <id>http://stevekane.github.com/blog/2013/03/13/dynamic-selection-box</id>
+    <content type="html"><![CDATA[<h2>Dependencies</h2>
+
+<p>The code for this post is built with Ember.js 1.0.0-RC1, handlebars RC3, and jQuery 1.9.1</p>
+
+<h2>Objective</h2>
+
+<p>We will see how the <strong>Ember.View</strong> updates when changing the model properties using mouse event coordinates. The end result is drawing a box which is an <strong>Ember.Object</strong> using click and drag.</p>
+
+<h3>Demo</h3>
+
+<p>This jsFiddle demonstrates the end result: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a>.
+Click on the gray box and hold down the mouse button. Drag to create and update a box object.</p>
+
+<h2>Ember Application Setup</h2>
+
+<p>Here we have defined two handlebars templates. The first is unnamed and will be used by the <strong>Application View</strong>.
+The second is called &#8220;box&#8221; using data-template-name and will be used by the <strong>Box View</strong>.</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="p">{{</span> <span class="nx">outlet</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span> <span class="na">data-template-name =</span><span class="err"> </span><span class="s">&quot;box&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="p">{{</span><span class="nx">content</span><span class="p">.</span><span class="nx">text</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we setup the App, Router, Routes, and Ember Object.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#SETUP APPLICATION</span>
+</span><span class='line'><span class="nv">App = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'><span class="nx">App</span><span class="p">.</span><span class="nx">Router</span><span class="p">.</span><span class="nx">map</span> <span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>  <span class="nx">@resource</span> <span class="s">&quot;box&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.IndexRoute = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>   <span class="nv">redirect: </span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@replaceWith</span> <span class="s">&#39;box&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.BoxRoute = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Box = </span><span class="nx">Ember</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">height: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">width: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">top: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">left: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">text: </span><span class="s">&#39;YAY COMIC SANS&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Application View / Controller</h2>
+
+<p>The <strong>Application View</strong> and <strong>Controller</strong> will be auto-generated by Ember if they are not declared. For this demo, the Application View will be handling the mouse events.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#uses &#39;needs&#39; API to access the box Controller</span>
+</span><span class='line'><span class="nv">App.ApplicationController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">needs: </span><span class="p">[</span><span class="s">&#39;box&#39;</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <strong>needs</strong> property lists other controllers so that you can access them from this controller by using this.get(&#8216;controllers.otherController&#8217;). &#8216;otherController&#8217; being &#8216;box&#8217; in this case.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#events handled on this view</span>
+</span><span class='line'><span class="nv">App.ApplicationView = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">classNames: </span><span class="p">[</span><span class="s">&quot;main&quot;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#EVENTS below</span>
+</span><span class='line'>    <span class="nv">mouseDown: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>        <span class="nv">boxCon = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;controller.controllers.box&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;initialX&#39;</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">offsetX</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;initialY&#39;</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">offsetY</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">createBox</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">offsetX</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">offsetY</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#calculate view offsets to get accurate click positions</span>
+</span><span class='line'>    <span class="nv">mouseMove: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>        <span class="nv">viewOffsetLeft = </span><span class="nx">@$</span><span class="p">().</span><span class="nx">offset</span><span class="p">().</span><span class="nx">left</span>
+</span><span class='line'>        <span class="nv">viewOffsetTop = </span><span class="nx">@$</span><span class="p">().</span><span class="nx">offset</span><span class="p">().</span><span class="nx">top</span>
+</span><span class='line'>        <span class="nv">boxCon = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;controller.controllers.box&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">updateBoxArea</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">-</span> <span class="nx">viewOffsetLeft</span><span class="p">,</span>
+</span><span class='line'>                             <span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">-</span> <span class="nx">viewOffsetTop</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">#stops the box area update</span>
+</span><span class='line'>    <span class="nv">mouseUp: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>        <span class="nv">boxCon = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;controller.controllers.box&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;isUpdating&#39;</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Event Handling</h3>
+
+<p><strong>Ember.View</strong>&#8217;s can handle many/most of the browser events, a description may be found here: <a href = "http://emberjs.com/api/classes/Ember.View.html"> Ember View API </a>.
+Here we have used the mouseDown, mouseMove, and mouseUp events to capture a click and drag in the browser. We declare a &#8216;boxCon&#8217; variable that is set to the <strong>Box Controller</strong>, which was made available
+by using <strong>needs</strong> on the Application Controller. <br/> <br/>
+The mouseMove event is using the pageX and pageY attributes of the event. The reason for this is moving the mouse over a <strong>Box View</strong> would give the offsets relative to that view
+instead of the <strong>App View</strong>&#8217;s offsets. Since we are using event.pageX and event.pageY, we should account for the offset of the <strong>App View</strong> relative to the absolute top and left of the page.
+<strong>@$()</strong> or <strong>this.$()</strong> is a jQuery element which we then call the jQuery <strong>offset()</strong> method on. This returns an object with top and left properties.
+Each event then passes on the event information to the <strong>Box Controller</strong> via a method call or setting an attribute.</p>
+
+<h2>BoxController and BoxView Setup</h2>
+
+<p>The BoxController has an &#8216;isUpdating&#8217; flag, and the initial coordinates of the mouseDown event. The two methods are to create a box object
+at the click and to update the area of the new box based on mouse movements.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#controller to handle the calculations on the box properties</span>
+</span><span class='line'><span class="nv">App.BoxController = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">initialX: </span><span class="kc">null</span>
+</span><span class='line'>    <span class="nv">initialY: </span><span class="kc">null</span>
+</span><span class='line'>    <span class="nv">isUpdating: </span><span class="kc">false</span>
+</span><span class='line'>    <span class="c1">#calculate the new properties of the box</span>
+</span><span class='line'>    <span class="nv">updateBoxArea: </span><span class="nf">(X,Y)-&gt;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;isUpdating&#39;</span><span class="p">)</span>
+</span><span class='line'>            <span class="nv">box = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>            <span class="nv">origLeft = </span><span class="nx">@get</span> <span class="s">&#39;initialX&#39;</span>
+</span><span class='line'>            <span class="nv">origTop = </span><span class="nx">@get</span> <span class="s">&#39;initialY&#39;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="nx">X</span> <span class="o">&gt;=</span> <span class="nx">origLeft</span>
+</span><span class='line'>                <span class="nv">left = </span><span class="nx">origLeft</span>
+</span><span class='line'>                <span class="nv">width = </span><span class="nx">X</span> <span class="o">-</span> <span class="nx">origLeft</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="nx">X</span> <span class="o">&lt;</span> <span class="nx">origLeft</span>
+</span><span class='line'>                <span class="nv">left = </span><span class="nx">X</span>
+</span><span class='line'>                <span class="nv">width = </span><span class="nx">origLeft</span> <span class="o">-</span> <span class="nx">X</span>
+</span><span class='line'>            <span class="k">if</span> <span class="nx">Y</span> <span class="o">&gt;=</span> <span class="nx">origTop</span>
+</span><span class='line'>                <span class="nv">top = </span><span class="nx">origTop</span>
+</span><span class='line'>                <span class="nv">height = </span> <span class="nx">Y</span> <span class="o">-</span> <span class="nx">origTop</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="nx">Y</span> <span class="o">&lt;</span> <span class="nx">origTop</span>
+</span><span class='line'>                <span class="nv">top = </span><span class="nx">Y</span>
+</span><span class='line'>                <span class="nv">height = </span><span class="nx">origTop</span> <span class="o">-</span> <span class="nx">Y</span>
+</span><span class='line'>            <span class="nx">box</span><span class="p">.</span><span class="nx">setProperties</span><span class="p">({</span><span class="nv">left: </span><span class="nx">left</span><span class="p">,</span> <span class="nv">top: </span><span class="nx">top</span><span class="p">,</span> <span class="nv">height: </span><span class="nx">height</span><span class="p">,</span> <span class="nv">width: </span><span class="nx">width</span><span class="p">})</span>
+</span><span class='line'>    <span class="c1">#create a new box at the click coordinates</span>
+</span><span class='line'>    <span class="nv">createBox: </span><span class="nf">(X, Y)-&gt;</span>
+</span><span class='line'>        <span class="nv">a = </span><span class="nx">App</span><span class="p">.</span><span class="nx">Box</span><span class="p">.</span><span class="nx">create</span><span class="p">({</span><span class="nx">top</span><span class="o">:</span><span class="nx">Y</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="nx">X</span><span class="p">})</span>
+</span><span class='line'>        <span class="nx">@set</span><span class="p">(</span><span class="s">&#39;content&#39;</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">@set</span><span class="p">(</span><span class="s">&#39;isUpdating&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The BoxView is what allows the updated box object to be displayed. <strong>attributeBindings</strong> will attach an attribute to the view element.
+In this case the attribute we want is <strong>style</strong>. &#8216;Style&#8217; is defined here as a computed property which returns a string. The result is
+the view element will have style=&#8221;height:50px;width=50px; etc&#8230;&#8221; This value will update whenever the properties of the box update, and
+cause the view to be re-rendered.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#View dynamically sets the &#39;style&#39; attribute via computed property and rerenders</span>
+</span><span class='line'><span class="nv">App.BoxView = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">classNames: </span><span class="p">[</span><span class="s">&#39;box&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;style&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nv">contentBinding: </span><span class="s">&#39;controller.content&#39;</span>
+</span><span class='line'>    <span class="nv">style: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>         <span class="nv">height = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.height&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">width = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.width&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">top = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.top&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">left = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.left&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">heightString = </span><span class="s">&quot;height:</span><span class="si">#{</span><span class="nx">height</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="nx">widthString</span><span class="o">=</span><span class="s">&quot;width:</span><span class="si">#{</span><span class="nx">width</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="nx">topString</span><span class="o">=</span><span class="s">&quot;top:</span><span class="si">#{</span><span class="nx">top</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="nx">leftString</span><span class="o">=</span><span class="s">&quot;left:</span><span class="si">#{</span><span class="nx">left</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="k">return</span> <span class="nx">heightString</span> <span class="o">+</span> <span class="nx">widthString</span> <span class="o">+</span> <span class="nx">topString</span> <span class="o">+</span> <span class="nx">leftString</span>
+</span><span class='line'>     <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&#39;content.height&#39;</span><span class="p">,</span> <span class="s">&#39;content.width&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;content.top&#39;</span><span class="p">,</span> <span class="s">&#39;content.left&#39;</span><span class="p">).</span><span class="nx">cacheable</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Improving the System</h3>
+
+<p>Here is the working jsFiddle showing the results of this demo: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a><br/><br/>
+What can we improve? Currently, during the box update there is a flag on the controller called &#8216;isUpdating&#8217; which is set to true, then when
+the update ends this flag is set to false. We could run into problems in the future if we add more features and forget what this flag is for.
+Then we could run into some crazy behavior since those mouse events are still firing when we move the mouse. A better solution might be to use
+a state machine instead of a flag and change states when appropriate. Each state would handle events and only the appropriate outcomes would
+be allowed. <br /><br/>
+That wraps it up, thanks for reading!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Dynamic Ember View Updating]]></title>
+    <link href="http://stevekane.github.com/blog/2013/03/13/dynamic-ember-view-updating/"/>
+    <updated>2013-03-13T22:40:00-05:00</updated>
+    <id>http://stevekane.github.com/blog/2013/03/13/dynamic-ember-view-updating</id>
+    <content type="html"><![CDATA[<h2>Dependencies</h2>
+
+<p>The code for this post is built with Ember.js 1.0.0-RC1, handlebars RC3, and jQuery 1.9.1</p>
+
+<h2>Objective</h2>
+
+<p>We will see how the <strong>Ember.View</strong> updates when changing the model properties using mouse event coordinates. The end result is drawing a box which is an <strong>Ember.Object</strong> using click and drag.</p>
+
+<h3>Demo</h3>
+
+<p>This jsFiddle demonstrates the end result: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a>.
+Click on the gray box and hold down the mouse button. Drag to create and update a box object.</p>
+
+<h2>Ember Application Setup</h2>
+
+<p>Here we have defined two handlebars templates. The first is unnamed and will be used by the <strong>Application View</strong>.
+The second is called &#8220;box&#8221; using data-template-name and will be used by the <strong>Box View</strong>.</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="p">{{</span> <span class="nx">outlet</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span> <span class="na">data-template-name =</span><span class="err"> </span><span class="s">&quot;box&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="p">{{</span><span class="nx">content</span><span class="p">.</span><span class="nx">text</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we setup the App, Router, Routes, and Ember Object.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#SETUP APPLICATION</span>
+</span><span class='line'><span class="nv">App = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'><span class="nx">App</span><span class="p">.</span><span class="nx">Router</span><span class="p">.</span><span class="nx">map</span> <span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>  <span class="nx">@resource</span> <span class="s">&quot;box&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.IndexRoute = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>   <span class="nv">redirect: </span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@replaceWith</span> <span class="s">&#39;box&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.BoxRoute = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Box = </span><span class="nx">Ember</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">height: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">width: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">top: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">left: </span><span class="mi">0</span>
+</span><span class='line'>    <span class="nv">text: </span><span class="s">&#39;YAY COMIC SANS&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Application View / Controller</h2>
+
+<p>The <strong>Application View</strong> and <strong>Controller</strong> will be auto-generated by Ember if they are not declared. For this demo, the Application View will be handling the mouse events.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#uses &#39;needs&#39; API to access the box Controller</span>
+</span><span class='line'><span class="nv">App.ApplicationController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">needs: </span><span class="p">[</span><span class="s">&#39;box&#39;</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <strong>needs</strong> property lists other controllers so that you can access them from this controller by using this.get(&#8216;controllers.otherController&#8217;). &#8216;otherController&#8217; being &#8216;box&#8217; in this case.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#events handled on this view</span>
+</span><span class='line'><span class="nv">App.ApplicationView = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">classNames: </span><span class="p">[</span><span class="s">&quot;main&quot;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#EVENTS below</span>
+</span><span class='line'>    <span class="nv">mouseDown: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>        <span class="nv">boxCon = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;controller.controllers.box&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;initialX&#39;</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">offsetX</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;initialY&#39;</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">offsetY</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">createBox</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">offsetX</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">offsetY</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#calculate view offsets to get accurate click positions</span>
+</span><span class='line'>    <span class="nv">mouseMove: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>        <span class="nv">viewOffsetLeft = </span><span class="nx">@$</span><span class="p">().</span><span class="nx">offset</span><span class="p">().</span><span class="nx">left</span>
+</span><span class='line'>        <span class="nv">viewOffsetTop = </span><span class="nx">@$</span><span class="p">().</span><span class="nx">offset</span><span class="p">().</span><span class="nx">top</span>
+</span><span class='line'>        <span class="nv">boxCon = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;controller.controllers.box&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">updateBoxArea</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">-</span> <span class="nx">viewOffsetLeft</span><span class="p">,</span>
+</span><span class='line'>                             <span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">-</span> <span class="nx">viewOffsetTop</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">#stops the box area update</span>
+</span><span class='line'>    <span class="nv">mouseUp: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>        <span class="nv">boxCon = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;controller.controllers.box&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">boxCon</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;isUpdating&#39;</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Event Handling</h3>
+
+<p><strong>Ember.View</strong>&#8217;s can handle many/most of the browser events, a description may be found here: <a href = "http://emberjs.com/api/classes/Ember.View.html"> Ember View API </a>.
+Here we have used the mouseDown, mouseMove, and mouseUp events to capture a click and drag in the browser. We declare a &#8216;boxCon&#8217; variable that is set to the <strong>Box Controller</strong>, which was made available
+by using <strong>needs</strong> on the Application Controller. <br/> <br/>
+The mouseMove event is using the pageX and pageY attributes of the event. The reason for this is moving the mouse over a <strong>Box View</strong> would give the offsets relative to that view
+instead of the <strong>App View</strong>&#8217;s offsets. Since we are using event.pageX and event.pageY, we should account for the offset of the <strong>App View</strong> relative to the absolute top and left of the page.
+<strong>@$()</strong> or <strong>this.$()</strong> is a jQuery element which we then call the jQuery <strong>offset()</strong> method on. This returns an object with top and left properties.
+Each event then passes on the event information to the <strong>Box Controller</strong> via a method call or setting an attribute.</p>
+
+<h2>BoxController and BoxView Setup</h2>
+
+<p>The BoxController has an &#8216;isUpdating&#8217; flag, and the initial coordinates of the mouseDown event. The two methods are to create a box object
+at the click and to update the area of the new box based on mouse movements.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#controller to handle the calculations on the box properties</span>
+</span><span class='line'><span class="nv">App.BoxController = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">initialX: </span><span class="kc">null</span>
+</span><span class='line'>    <span class="nv">initialY: </span><span class="kc">null</span>
+</span><span class='line'>    <span class="nv">isUpdating: </span><span class="kc">false</span>
+</span><span class='line'>    <span class="c1">#calculate the new properties of the box</span>
+</span><span class='line'>    <span class="nv">updateBoxArea: </span><span class="nf">(X,Y)-&gt;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;isUpdating&#39;</span><span class="p">)</span>
+</span><span class='line'>            <span class="nv">box = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>            <span class="nv">origLeft = </span><span class="nx">@get</span> <span class="s">&#39;initialX&#39;</span>
+</span><span class='line'>            <span class="nv">origTop = </span><span class="nx">@get</span> <span class="s">&#39;initialY&#39;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="nx">X</span> <span class="o">&gt;=</span> <span class="nx">origLeft</span>
+</span><span class='line'>                <span class="nv">left = </span><span class="nx">origLeft</span>
+</span><span class='line'>                <span class="nv">width = </span><span class="nx">X</span> <span class="o">-</span> <span class="nx">origLeft</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="nx">X</span> <span class="o">&lt;</span> <span class="nx">origLeft</span>
+</span><span class='line'>                <span class="nv">left = </span><span class="nx">X</span>
+</span><span class='line'>                <span class="nv">width = </span><span class="nx">origLeft</span> <span class="o">-</span> <span class="nx">X</span>
+</span><span class='line'>            <span class="k">if</span> <span class="nx">Y</span> <span class="o">&gt;=</span> <span class="nx">origTop</span>
+</span><span class='line'>                <span class="nv">top = </span><span class="nx">origTop</span>
+</span><span class='line'>                <span class="nv">height = </span> <span class="nx">Y</span> <span class="o">-</span> <span class="nx">origTop</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="nx">Y</span> <span class="o">&lt;</span> <span class="nx">origTop</span>
+</span><span class='line'>                <span class="nv">top = </span><span class="nx">Y</span>
+</span><span class='line'>                <span class="nv">height = </span><span class="nx">origTop</span> <span class="o">-</span> <span class="nx">Y</span>
+</span><span class='line'>            <span class="nx">box</span><span class="p">.</span><span class="nx">setProperties</span><span class="p">({</span><span class="nv">left: </span><span class="nx">left</span><span class="p">,</span> <span class="nv">top: </span><span class="nx">top</span><span class="p">,</span> <span class="nv">height: </span><span class="nx">height</span><span class="p">,</span> <span class="nv">width: </span><span class="nx">width</span><span class="p">})</span>
+</span><span class='line'>    <span class="c1">#create a new box at the click coordinates</span>
+</span><span class='line'>    <span class="nv">createBox: </span><span class="nf">(X, Y)-&gt;</span>
+</span><span class='line'>        <span class="nv">a = </span><span class="nx">App</span><span class="p">.</span><span class="nx">Box</span><span class="p">.</span><span class="nx">create</span><span class="p">({</span><span class="nx">top</span><span class="o">:</span><span class="nx">Y</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="nx">X</span><span class="p">})</span>
+</span><span class='line'>        <span class="nx">@set</span><span class="p">(</span><span class="s">&#39;content&#39;</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">@set</span><span class="p">(</span><span class="s">&#39;isUpdating&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The BoxView is what allows the updated box object to be displayed. <strong>attributeBindings</strong> will attach an attribute to the view element.
+In this case the attribute we want is <strong>style</strong>. &#8216;Style&#8217; is defined here as a computed property which returns a string. The result is
+the view element will have style=&#8221;height:50px;width=50px; etc&#8230;&#8221; This value will update whenever the properties of the box update, and
+cause the view to be re-rendered.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1">#View dynamically sets the &#39;style&#39; attribute via computed property and rerenders</span>
+</span><span class='line'><span class="nv">App.BoxView = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">classNames: </span><span class="p">[</span><span class="s">&#39;box&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;style&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nv">contentBinding: </span><span class="s">&#39;controller.content&#39;</span>
+</span><span class='line'>    <span class="nv">style: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>         <span class="nv">height = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.height&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">width = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.width&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">top = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.top&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">left = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.left&#39;</span><span class="p">)</span>
+</span><span class='line'>         <span class="nv">heightString = </span><span class="s">&quot;height:</span><span class="si">#{</span><span class="nx">height</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="nx">widthString</span><span class="o">=</span><span class="s">&quot;width:</span><span class="si">#{</span><span class="nx">width</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="nx">topString</span><span class="o">=</span><span class="s">&quot;top:</span><span class="si">#{</span><span class="nx">top</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="nx">leftString</span><span class="o">=</span><span class="s">&quot;left:</span><span class="si">#{</span><span class="nx">left</span><span class="si">}</span><span class="s">px;&quot;</span>
+</span><span class='line'>         <span class="k">return</span> <span class="nx">heightString</span> <span class="o">+</span> <span class="nx">widthString</span> <span class="o">+</span> <span class="nx">topString</span> <span class="o">+</span> <span class="nx">leftString</span>
+</span><span class='line'>     <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&#39;content.height&#39;</span><span class="p">,</span> <span class="s">&#39;content.width&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;content.top&#39;</span><span class="p">,</span> <span class="s">&#39;content.left&#39;</span><span class="p">).</span><span class="nx">cacheable</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Improving the System</h3>
+
+<p>Here is the working jsFiddle showing the results of this demo: <a href="http://jsfiddle.net/chen_pete/5m95y/9/">Completed Fiddle</a><br/><br/>
+What can we improve? Currently, during the box update there is a flag on the controller called &#8216;isUpdating&#8217; which is set to true, then when
+the update ends this flag is set to false. We could run into problems in the future if we add more features and forget what this flag is for.
+Then we could run into some crazy behavior since those mouse events are still firing when we move the mouse. A better solution might be to use
+a state machine instead of a flag and change states when appropriate. Each state would handle events and only the appropriate outcomes would
+be allowed. <br /><br/>
+That wraps it up, thanks for reading!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Layering Canvases with Ember.ContainerView]]></title>
+    <link href="http://stevekane.github.com/blog/2013/02/22/layered-canvases-with-css-extraction/"/>
+    <updated>2013-02-22T01:30:00-06:00</updated>
+    <id>http://stevekane.github.com/blog/2013/02/22/layered-canvases-with-css-extraction</id>
+    <content type="html"><![CDATA[<h2>Dependency Versions</h2>
+
+<p>This post was built with Ember.js 1.0.0RC1, handlebars RC3, and jQuery 1.9.1</p>
+
+<h2>Understand The Goal</h2>
+
+<h3>What will we explore?</h3>
+
+<p>Our goal is to use Ember&#8217;s <strong>ContainerView</strong> class to wrap up <strong>multiple HTML5 canvas elements</strong> into a single, layered display.  This pattern is extremely
+common for effective use of canvas elements and Ember offers an elegant solution for encapsulating them as a &#8220;unit&#8221;.</p>
+
+<h3>Show me the end product before I listen&#8230;</h3>
+
+<p>Feel free to check out this <a href="http://jsfiddle.net/skane/msvDW/34/">Completed Fiddle</a> or build your own fiddle as we go.</p>
+
+<h2>Separating Signals and Noise</h2>
+
+<p>This project, and many that follow require some &#8220;support&#8221; code to achieve the end goal.  Often times that code is not germane to the point the article is trying
+to make about Ember.js.</p>
+
+<h3>Signals</h3>
+
+<p>Use of Container/Canvas Views<br />
+Dynamic styling using computed properties<br />
+Initial Canvas drawing and re-rendering<br /></p>
+
+<h3>Noise</h3>
+
+<p>Buttons to change linecount and supporting behavior validation<br />
+Local variable setup<br />
+Methods for drawing to canvas (these are worth exploring but don&#8217;t directly convey our purpose here)<br /></p>
+
+<h2>Ember setup</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.ApplicationController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="c1">#we use this instead of the more typical &quot;content&quot; to avoid making Application Controller angry</span>
+</span><span class='line'>  <span class="nv">appVars: </span><span class="nx">Em</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">create</span>
+</span><span class='line'>    <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>    <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>    <span class="nv">lineCount: </span><span class="mi">3</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>  <span class="nv">isVertical: </span><span class="kc">true</span>
+</span><span class='line'>  <span class="nv">didInsertElement: </span><span class="p">()</span><span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">fill: </span><span class="p">()</span><span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="c1">#this will be our primary drawing method (to be continued...)</span>
+</span><span class='line'>    <span class="k">return</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.CompositeView = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">ContainerView</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;div&quot;</span>
+</span><span class='line'>  <span class="nv">childViews: </span><span class="p">[</span><span class="s">&#39;canvas1&#39;</span><span class="p">,</span> <span class="s">&#39;canvas2&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">canvas1: </span><span class="nx">App</span><span class="p">.</span><span class="nx">Canvas</span><span class="p">.</span><span class="nx">create</span>
+</span><span class='line'>    <span class="nv">isVertical: </span><span class="kc">false</span>
+</span><span class='line'>    <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>    <span class="nv">color2: </span><span class="s">&quot;grey&quot;</span>
+</span><span class='line'>  <span class="nv">canvas2: </span><span class="nx">App</span><span class="p">.</span><span class="nx">Canvas</span><span class="p">.</span><span class="nx">create</span>
+</span><span class='line'>    <span class="nv">color1: </span><span class="s">&quot;red&quot;</span>
+</span><span class='line'>    <span class="nv">color2: </span><span class="s">&quot;white&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>What is all this&#8230;stuff?</h3>
+
+<p>The <strong>ApplicationController</strong> is the context for all our views in this system.  It will eventually also house a few basic methods to support some html buttons.<br />
+The <strong>CompositeView</strong> is an instance of Ember&#8217;s ContainerView and is used to hold the two canvases (which contain the bulk of the program&#8217;s code)<br />
+The <strong>Canvas Views</strong> are setup to wrap HTML5 canvas elements (see previous blogpost for details).  We instantiate two of them as we intend to build a layered display.</p>
+
+<h2>Add a template and give our views some style</h2>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Test</span> <span class="nx">to</span> <span class="nx">confirm</span> <span class="nx">the</span> <span class="nx">template</span> <span class="nx">is</span> <span class="nx">loading</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>  <span class="p">{{</span> <span class="nx">view</span> <span class="s1">&#39;App.CompositeView&#39;</span> <span class="nx">contentBinding</span><span class="o">=</span><span class="s1">&#39;appVars&#39;</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This template is our <strong>application template</strong> (Ember automatically assigns this if no <strong>data-template-name</strong> is declared in the script tag).  We add a line to confirm
+our app is rendering this template and we add a handlebars tag to create an instance of our view and bind its content to the applicationController&#8217;s <strong>appVars</strong> attribute.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.CompositeView = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ContainerView</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">tagName: </span><span class="s">&quot;div&quot;</span>
+</span><span class='line'>    <span class="c1">#this computed property will create a CSS style string </span>
+</span><span class='line'>    <span class="nv">style: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="s">&quot;height:&quot;</span> <span class="o">+</span> <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.height&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;px;&quot;</span> <span class="o">+</span> <span class="s">&quot;width:&quot;</span> <span class="o">+</span> <span class="nx">@get</span><span class="p">(</span><span class="s">&#39;content.width&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;px;&quot;</span>
+</span><span class='line'>    <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&#39;content.height, content.width&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;style&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nv">childViews: </span><span class="p">[</span><span class="s">&#39;canvas1&#39;</span><span class="p">,</span> <span class="s">&#39;canvas2&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">canvas1: </span><span class="nx">App</span><span class="p">.</span><span class="nx">Canvas</span><span class="p">.</span><span class="nx">create</span>
+</span><span class='line'>        <span class="nv">isVertical: </span> <span class="kc">false</span>
+</span><span class='line'>        <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>        <span class="nv">color2: </span><span class="s">&quot;grey&quot;</span>
+</span><span class='line'>    <span class="nv">canvas2: </span><span class="nx">App</span><span class="p">.</span><span class="nx">Canvas</span><span class="p">.</span><span class="nx">create</span>
+</span><span class='line'>        <span class="nv">color1: </span><span class="s">&quot;red&quot;</span>
+</span><span class='line'>        <span class="nv">color2: </span><span class="s">&quot;white&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This View is now complete and will not change for the rest of this post.  We have added a <strong>computed property called &#8220;style&#8221;</strong> to the view which constructs a string of
+in-line styles to be added onto the view&#8217;s element, &#8220;div&#8221;, via the <strong>attributeBindings</strong> attribute.  Read <a href="http://emberjs.com/api/classes/Ember.View.html">
+Ember&#8217;s View API</a> for more information on how these attributes work.<br />
+<strong>NOTE: This is not the only way to style an element but it showcases a method that will allow us to dynamically re-size our view if the view&#8217;s content.height or content.width are changed by our application.</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>    <span class="nv">contentBinding: </span><span class="s">&quot;parentView.content&quot;</span>
+</span><span class='line'>    <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nv">height: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@get</span> <span class="s">&quot;content.height&quot;</span>
+</span><span class='line'>    <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&#39;content.height&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nv">width: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@get</span> <span class="s">&quot;content.width&quot;</span>
+</span><span class='line'>    <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&#39;content.width&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nv">isVertical: </span><span class="kc">true</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">layoutChanged: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">).</span><span class="nx">observes</span><span class="p">(</span><span class="s">&#39;content.lineCount&#39;</span><span class="p">,</span> <span class="s">&#39;content.height&#39;</span><span class="p">,</span> <span class="s">&#39;content.width&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">didInsertElement: </span><span class="p">()</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>        <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">fill: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="k">return</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We have again added an attributeBindings method to our view but, critically, we have utilized it differently.  In the CompositeView we used <strong>in-line style</strong> to set
+our view&#8217;s height and width.  Here, we must use the <strong>html attributes &#8220;height&#8221; and &#8220;width&#8221;</strong> to give dimensions to a canvas element.  This is an important
+distinction.<br />
+Attributes <strong>height</strong> and <strong>width</strong> are implemented as computed properties that simply reflect <strong>content.height</strong> and <strong>content.width</strong>.  This again allows us
+to <strong>re-size our canvases</strong> elsewhere in our application should we want to do so.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">div</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">position</span><span class="o">:</span> <span class="k">relative</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nt">canvas</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">opacity</span><span class="o">:</span> <span class="o">.</span><span class="m">5</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">position</span><span class="o">:</span> <span class="k">absolute</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Setting position:absolute on the canvas means they will draw directly on top of our div element rather than in normal html block format.  The results of this aren&#8217;t yet apparent but they will be shortly.  We set opacity so that our layers are partially transparent.</p>
+
+<h2>Canvas drawing code</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>    <span class="nv">contentBinding: </span><span class="s">&quot;parentView.content&quot;</span>
+</span><span class='line'>    <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nv">height: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@get</span> <span class="s">&quot;content.height&quot;</span>
+</span><span class='line'>    <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&#39;content.height&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nv">width: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@get</span> <span class="s">&quot;content.width&quot;</span>
+</span><span class='line'>    <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&#39;content.width&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nv">isVertical: </span><span class="kc">true</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">layoutChanged: </span><span class="p">(</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">).</span><span class="nx">observes</span><span class="p">(</span><span class="s">&#39;content.lineCount&#39;</span><span class="p">,</span> <span class="s">&#39;content.height&#39;</span><span class="p">,</span> <span class="s">&#39;content.width&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">didInsertElement: </span><span class="p">()</span><span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>        <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">fill: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="nv">isVertical = </span><span class="nx">@get</span> <span class="s">&quot;isVertical&quot;</span>
+</span><span class='line'>        <span class="nv">lineCount = </span><span class="nx">@get</span> <span class="s">&quot;content.lineCount&quot;</span>
+</span><span class='line'>        <span class="nv">el = </span><span class="nx">@get</span> <span class="s">&quot;element&quot;</span>
+</span><span class='line'>        <span class="nv">height = </span><span class="nx">@get</span> <span class="s">&quot;content.height&quot;</span>
+</span><span class='line'>        <span class="nv">width = </span><span class="nx">@get</span> <span class="s">&quot;content.width&quot;</span>
+</span><span class='line'>        <span class="nv">color1 = </span><span class="nx">@get</span> <span class="s">&quot;color1&quot;</span>
+</span><span class='line'>        <span class="nx">color2</span> <span class="o">=</span><span class="nx">@get</span> <span class="s">&quot;color2&quot;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nx">el</span>
+</span><span class='line'>            <span class="nv">ctx = </span><span class="nx">el</span><span class="p">.</span><span class="nx">getContext</span> <span class="s">&quot;2d&quot;</span>
+</span><span class='line'>            <span class="k">for</span> <span class="nx">lineNum</span> <span class="k">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">..</span><span class="nx">lineCount</span><span class="p">]</span>
+</span><span class='line'>                <span class="nv">color = </span><span class="k">if</span> <span class="nx">lineNum</span><span class="o">%</span><span class="mi">2</span> <span class="o">is</span> <span class="mi">0</span> <span class="k">then</span> <span class="nx">color2</span> <span class="k">else</span> <span class="nx">color1</span>
+</span><span class='line'>                <span class="nx">@drawRect</span> <span class="nx">ctx</span><span class="p">,</span> <span class="nx">color</span><span class="p">,</span> <span class="nx">lineNum</span><span class="p">,</span> <span class="nx">lineCount</span><span class="p">,</span> <span class="nx">isVertical</span><span class="p">,</span> <span class="nx">height</span><span class="p">,</span> <span class="nx">width</span>
+</span><span class='line'>    <span class="c1">#helper method that draws each uniquely-colored box</span>
+</span><span class='line'>    <span class="nv">drawRect: </span><span class="nf">(ctx, color, lineNum, lineCount, isVertical, height, width) -&gt;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nx">isVertical</span>
+</span><span class='line'>            <span class="nv">rHeight = </span><span class="nx">height</span>
+</span><span class='line'>            <span class="nv">rStartY = </span><span class="mi">0</span>
+</span><span class='line'>            <span class="nv">rWidth = </span><span class="nx">width</span><span class="o">/</span><span class="nx">lineCount</span>
+</span><span class='line'>            <span class="nv">rStartX = </span><span class="nx">width</span><span class="o">/</span><span class="nx">lineCount</span> <span class="o">*</span> <span class="p">(</span><span class="nx">lineNum</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>         <span class="k">else</span>
+</span><span class='line'>            <span class="nv">rHeight = </span><span class="nx">height</span><span class="o">/</span><span class="nx">lineCount</span>
+</span><span class='line'>            <span class="nv">rStartY = </span><span class="nx">height</span><span class="o">/</span><span class="nx">lineCount</span> <span class="o">*</span> <span class="p">(</span><span class="nx">lineNum</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>            <span class="nv">rWidth = </span><span class="nx">width</span>
+</span><span class='line'>            <span class="nv">rStartX = </span><span class="mi">0</span>
+</span><span class='line'>         <span class="nv">ctx.fillStyle = </span><span class="nx">color</span>
+</span><span class='line'>         <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="nx">rStartX</span><span class="p">,</span> <span class="nx">rStartY</span><span class="p">,</span> <span class="nx">rWidth</span><span class="p">,</span> <span class="nx">rHeight</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This class is now finished and will not change for the rest of this post.<br />
+This code looks a little dense but its purpose is very simple.  It draws <strong>horizontal</strong> or <strong>vertical</strong> stripes onto our canvases using the low-level canvas API&#8217;s methods.  It is easy to google these methods so I will not explain them here.  The rest of the lines are dedicated to calculating x,y,height, and width based on our view&#8217;s content (which is inherited from applicationController.appVars).  <strong>Feel free to tweet, email, or comment below if any of this is unclear</strong>.  <br />
+<strong>NOTE: Be sure to remove the &#8220;return&#8221; we had listed in the fill method initially.  It was only there as filler.</strong><br />
+Finally, we also implement an Ember observer called <strong>layoutChanged which fires any time content.lineCount, content.height, or content.width change</strong>.  We use this to signal to our canvas that it must re-draw itself.  We don&#8217;t need to clear the canvas in this particular app because our draw process completely re-draws the whole canvas.  <strong>This may not always be the case!</strong></p>
+
+<h2>Dynamically re-draw our canvas by changing lineCount!</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.ApplicationController = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">appVars: </span><span class="nx">Ember</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">create</span>
+</span><span class='line'>        <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>        <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>        <span class="nv">lineCount: </span><span class="mi">3</span>
+</span><span class='line'>     <span class="c1">#methods to change lineCount within range 1-&gt;10</span>
+</span><span class='line'>     <span class="nv">upLineCount: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nx">@get</span><span class="p">(</span><span class="s">&quot;appVars.lineCount&quot;</span><span class="p">)</span> <span class="o">&lt;=</span><span class="mi">9</span>
+</span><span class='line'>            <span class="nx">@incrementProperty</span> <span class="s">&quot;appVars.lineCount&quot;</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>            <span class="nx">@set</span> <span class="s">&quot;appVars.lineCount&quot;</span><span class="p">,</span> <span class="mi">10</span>
+</span><span class='line'>     <span class="nv">downLineCount: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nx">@get</span><span class="p">(</span><span class="s">&quot;appVars.lineCount&quot;</span><span class="p">)</span> <span class="o">&gt;=</span><span class="mi">1</span>
+</span><span class='line'>            <span class="nx">@decrementProperty</span> <span class="s">&quot;appVars.lineCount&quot;</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>            <span class="nx">@set</span> <span class="s">&quot;appVars.lineCount&quot;</span><span class="p">,</span> <span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>These new methods on the applicationController change the lineCount attribute on appVars within the range 1->10.  We will call these methods from our template as shown below.</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">Use</span> <span class="nx">buttons</span> <span class="nx">to</span> <span class="nx">change</span> <span class="nx">line</span> <span class="nx">density</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">button</span> <span class="p">{{</span><span class="nx">action</span> <span class="s1">&#39;upLineCount&#39;</span> <span class="p">}}</span><span class="o">&gt;</span><span class="nx">Increase</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">button</span> <span class="p">{{</span><span class="nx">action</span> <span class="s1">&#39;downLineCount&#39;</span> <span class="p">}}</span><span class="o">&gt;</span><span class="nx">Decrease</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>    <span class="p">{{</span> <span class="nx">controller</span><span class="p">.</span><span class="nx">appVars</span><span class="p">.</span><span class="nx">lineCount</span> <span class="p">}}</span>
+</span><span class='line'>    <span class="p">{{</span> <span class="nx">view</span> <span class="s1">&#39;App.CompositeView&#39;</span> <span class="nx">contentBinding</span><span class="o">=</span><span class="s1">&#39;appVars&#39;</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We have added buttons that utilize Ember&#8217;s <strong>action</strong> handlebars tag to call the new methods on applicationController.  We now have a way for users to change the lineCount which creates such dreamy, dreamy patterns&#8230;</p>
+
+<h2>Conclusion and future work</h2>
+
+<p>Once again, here is a <a href="http://jsfiddle.net/skane/msvDW/34/">Completed Fiddle</a> showcasing this application.
+This post has highlighted a pattern that we intend to elaborate on with examples of <strong>UI widgets, editable objects, and more advanced canvas APIs</strong>.  If you understand what is going on in this post and in the previous canvas post you will be prepared to do some truly useful things in Ember.js!  Who doesn&#8217;t love being useful?  Cats&#8230;that&#8217;s who.<br />
+<strong>/golfclap<br />
+/bow</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Wrapping HTML5 Canvas with Ember View]]></title>
+    <link href="http://stevekane.github.com/blog/2013/02/14/test-pos/"/>
+    <updated>2013-02-14T23:02:00-06:00</updated>
+    <id>http://stevekane.github.com/blog/2013/02/14/test-pos</id>
+    <content type="html"><![CDATA[<h2>Dependency Versions</h2>
+
+<p>This post was built with Ember.js 1.0.0pre4, handlebars RC2, and jQuery 1.9.1</p>
+
+<h2>Understand The Goal</h2>
+
+<h3>What is Happening Here ?</h3>
+
+<p>We are going to use <strong>Ember.View</strong> to wrap an <strong>HTML5 &lt;canvas> element</strong>.  This will allow us to use the canvas API to draw shapes/data/whatever while utilizing Ember&#8217;s data structures, route handlers, and other bells/whistles that make it so great.</p>
+
+<h3>See Into the Future !</h3>
+
+<p>Cheat and check out this <a href="http://jsfiddle.net/skane/NyxkD/2/">Completed Fiddle</a> Or build your <a href="http://jsfiddle.net">Own Fiddle</a> as you learn.</p>
+
+<h2>Write Minimally Viable Ember Application (that does something)</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nx">Text</span> <span class="nx">to</span> <span class="nx">demonstrate</span> <span class="nx">App</span> <span class="nx">is</span> <span class="nx">functioning</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Where&#8217;s the Router    ? :-/</h3>
+
+<p>Ember generates a <strong>default router</strong> for us.  We are not changing routes so no need to explicitly declare it ourselves.</p>
+
+<h3>Why Define The Template    ? :-/</h3>
+
+<p>Primarily, we demonstrate our app&#8217;s validity.  Secondarily, we are going to modify this to be more useful in the next section.</p>
+
+<h2>Construct Canvas View, Modify application Template, Add CSS Border</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="c1">#attributes used to define and render the canvas </span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>  <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>  <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>  <span class="nv">color2: </span><span class="s">&quot;orange&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nx">Text</span> <span class="nx">to</span> <span class="nx">demonstrate</span> <span class="nx">App</span> <span class="nx">is</span> <span class="nx">functioning</span>
+</span><span class='line'>  <span class="p">{{</span> <span class="nx">view</span> <span class="s1">&#39;App.Canvas&#39;</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">canvas</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">border</span><span class="o">:</span> <span class="m">5px</span> <span class="k">solid</span> <span class="nb">black</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>What is the Meaning of &#8220;view App.Canvas&#8221;    ? :-/</h3>
+
+<p>This will create a new instance of the view <strong>App.Canvas</strong> and render it into the application template.  The view has the same context as the current template
+(in this case Ember has <strong>automagically generated applicationController</strong>).</p>
+
+<h3>And the Attributes    ? :-|</h3>
+
+<p><strong>AttributeBindings</strong> is an array of strings that references other attributes on the view.  It creates HTML attributes by those attribute names with the values stored
+in each attribute.  If the attributes change on the view, they will also change in the HTML.  We are using <strong>height</strong> and <strong>width</strong> in this manner and the resulting
+output is shown below.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;canvas</span> <span class="na">height=</span><span class="s">&quot;300&quot;</span> <span class="na">width=</span><span class="s">&quot;300&quot;</span><span class="nt">&gt;&lt;/canvas&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Attributes <strong>color1</strong> and <strong>color2</strong> are going to be used by our application to determine what colors to paint our canvas.  More on that to come&#8230;</p>
+
+<h2>Hook Into DOM Insertion and Design a Fill Method</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="c1">#attributes used to define and render the canvas</span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>  <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>  <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>  <span class="nv">color2: </span><span class="s">&quot;orange&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#this method is fired when this view&#39;s element is inserted in the DOM</span>
+</span><span class='line'>  <span class="nv">didInsertElement: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">fill: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="c1">#local variables for clarity</span>
+</span><span class='line'>    <span class="nv">halfHeight = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span class='line'>    <span class="nv">width = </span><span class="nx">@get</span> <span class="s">&quot;width&quot;</span>
+</span><span class='line'>    <span class="nv">c1 = </span><span class="nx">@get</span> <span class="s">&quot;color1&quot;</span>
+</span><span class='line'>    <span class="nv">c2 = </span><span class="nx">@get</span> <span class="s">&quot;color2&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#draw canvas parameters and methods (basic canvas api)</span>
+</span><span class='line'>    <span class="nv">ctx = </span><span class="nx">el</span><span class="p">.</span><span class="nx">getContext</span> <span class="s">&quot;2d&quot;</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c1</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c2</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">halfHeight</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>What Are These New Methods ?     (╯°□°)╯︵ ┻━┻</h3>
+
+<p><strong>didInsertElement</strong> is a method baked into Ember.View that fires when the view&#8217;s element (in our case, canvas) is inserted into the DOM.
+This method may be overridden to call our <strong>fill</strong> method initially.<br /><br />
+<strong>fill</strong> is a method that we have defined that uses the low-level canvas drawing API to color half the canvas orange
+ and half the canvas blue.  You can easily read about these methods on <a href="http://developer.mozilla.org">MDN</a> or
+a number of other references.</p>
+
+<h3>Draw Using Any Canvas API You Prefer !     ┬─┬ ノ(゜-゜ノ)</h3>
+
+<p>You could easily load one of many, many <a href="https://docs.google.com/spreadsheet/ccc?key=0Aqj_mVmuz3Y8dHNhUVFDYlRaaXlyX0xYSTVnalV5ZlE#gid=0">Canvas 2d Libraries</a>
+and use them to draw whatever you want in reaction to DOM events, user interaction, or even animations.</p>
+
+<h3>Tell Me More About this&#8230;Event Handling ! :-)</h3>
+
+<p>We can easily use the browser&#8217;s events such as <strong>click</strong>, <strong>doubleClick</strong>, <strong>mouseEnter</strong> etc to bind functions on our view to those events.  Ember provides method hooks
+for these events with obvious names.  A complete list of these is found <a href="https://emberjs.com/api/classes/Ember.View.html">Here</a>.</p>
+
+<h2>I Hold Tight To Your Hand As We Step Into This Brave New World</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="c1">#attributes used to define and render the canvas</span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>  <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>  <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>  <span class="nv">color2: </span><span class="s">&quot;orange&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#this method is fired when this view&#39;s element is inserted in the DOM</span>
+</span><span class='line'>  <span class="nv">didInsertElement: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">fill: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="c1">#local variables for clarity</span>
+</span><span class='line'>    <span class="nv">halfHeight = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span class='line'>    <span class="nv">width = </span><span class="nx">@get</span> <span class="s">&quot;width&quot;</span>
+</span><span class='line'>    <span class="nv">c1 = </span><span class="nx">@get</span> <span class="s">&quot;color1&quot;</span>
+</span><span class='line'>    <span class="nv">c2 = </span><span class="nx">@get</span> <span class="s">&quot;color2&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#draw canvas parameters and methods (basic canvas api)</span>
+</span><span class='line'>    <span class="nv">ctx = </span><span class="nx">el</span><span class="p">.</span><span class="nx">getContext</span> <span class="s">&quot;2d&quot;</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c1</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c2</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">halfHeight</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#click event handler</span>
+</span><span class='line'>    <span class="nv">click: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>      <span class="nv">c1 = </span><span class="nx">@get</span> <span class="s">&quot;color1&quot;</span>
+</span><span class='line'>      <span class="nv">c2 = </span><span class="nx">@get</span> <span class="s">&quot;color2&quot;</span>
+</span><span class='line'>      <span class="nx">@set</span> <span class="s">&quot;color1&quot;</span><span class="p">,</span> <span class="nx">c2</span>
+</span><span class='line'>      <span class="nx">@set</span> <span class="s">&quot;color2&quot;</span><span class="p">,</span> <span class="nx">c1</span>
+</span><span class='line'>      <span class="nx">@fill</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Click the Box Repeatedly To Feel that <a href="http://www.illinois.edu">Illini Pride</a></h3>
+
+<p>Our <strong>click</strong> event handles all browser click events that target our <strong>canvas</strong> and swaps the colors before calling <strong>fill</strong> again.<br/>
+Consider what else you might do with such an event handler: <br />
+<strong>mouseMove</strong> could be used to capture mouse coordinates and draw directly onto the canvas<br />
+<strong>keyDown</strong> could be used to capture keys and output printed text in the canvas<br />
+<strong>etc etc etc</strong><br />
+If you make an interesting feature and would like to share your fiddle, shoot me a tweet and I&#8217;ll append your fiddle to this blog post for others to learn from.</p>
+
+<h2>En Futuro</h2>
+
+<h3>Explore Options for Nested Canvas Elements</h3>
+
+<p>Nested canvas elements may be used as overlays on top of classical HTML elements which allows you to blend per-pixel drawing with standard HTML/CSS skills.</p>
+
+<h3>Explore Options for Using Advanced Canvas APIs</h3>
+
+<p>Advaned canvas APIs offer greater flexibility and higher-level abstractions useful for quickly producing impressive results.</p>
+
+<h3>Explore Options for Rendering Using WebGL (2d/3d)</h3>
+
+<p>WebGL is the bees knees and Ember.js has potential to weave together the rendering power of WebGL with Ember&#8217;s data management systems.  <strong>Ermagerd&#8230;werb GR ER</strong></p>
+]]></content>
+  </entry>
+  
+</feed>

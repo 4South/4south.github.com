@@ -1,0 +1,624 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Wrapping HTML5 Canvas with Ember View - Trial By Fire</title>
+  <meta name="author" content="Steve Kane (@stv_kn)">
+
+  
+  <meta name="description" content="Dependency Versions This post was built with Ember.js 1.0.0pre4, handlebars RC2, and jQuery 1.9.1 Understand The Goal What is Happening Here ? We are &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://stevekane.github.com/blog/2013/02/14/test-pos/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="" rel="alternate" title="Trial By Fire" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body    class="collapse-sidebar sidebar-footer" >
+  <header role="banner" id="siteheader"><hgroup>
+  <h1><a href="/">Trial By Fire</a></h1>
+  
+    <h2>Learn Ember.js by Clear Example</h2>
+  
+  
+    <h3>Follow @stv_kn for New Articles</h3>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><!--
+<ul class="subscription" data-subscription="rss">
+  <li><a href="" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+-->
+<ul class="main-navigation">
+  <li><a href="/blog/archives">Ember Blogs</a></li>
+  <li><a href="https://twitter.com/stv_kn" data-show-count="false">@stv_kn</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></li>
+  <li><a href="https://twitter.com/chen_pete" data-show-count="false">@chen_pete</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></li>
+  <li><a href="https://github.com/emberjs/ember.js">Ember</a></li>
+  <li><a href="https://github.com/emberjs/data">EmberData</a></li>
+  <li><a href="http://jsFiddle.net">jSfiddle</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    <section id="resources">
+<details>
+  <summary>Wtf is <a href="http://emberjs.com/">Ember.js</a> and How Do I Use this Blog</summary>
+  <content>
+    <table id="resource table">
+      <tbody>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://stevekane.github.com">This Blog</a>
+          </td>
+          <td class="resourcedescription">
+            Teaches Ember.js through advanced examples not found in introductory material.
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://emberjs.com">Ember</a>
+          </td>
+          <td class="resourcedescription">
+            A Javascript MVC framework for complex client-side web applications. 
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://github.com/emberjs/data">Ember Data</a>
+          </td>
+          <td class="resourcedescription">
+            A persistance and relation-based object system for Ember.js.
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://jsfiddle.net">JSFiddle</a>
+          </td>
+          <td class="resourcedescription">
+            Browser-based Web-development "playground" app.  <a href="http://emberplay.com">EmberPlay.com</a> and <a href="http://jsbin.com">JSBin.com</a> are other similar tools.<br>
+            To set up JSfiddle, add jQuery 1.9.1 to the onLoad Framework.  Add these two urls to your Managed Resources:
+            <p class="url">https://raw.github.com/emberjs/ember.js/release-builds/ember-1.0.0-rc.1.js</p>
+            <p class="url">https://raw.github.com/wycats/handlebars.js/1.0.0-rc.3/dist/handlebars.js</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </content>
+</details>
+</section>
+
+    <section id="resources">
+  <details>
+  <summary>Shortlist of Valuable Resources for <a href="http://emberjs.com">Emberjs</a> Developers</summary>
+  <content>
+    <table id="resource table">
+      <tbody>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="https://peepcode.com/products/emberjs">PeepCode $</a>
+          </td>
+          <td class="resourcedescription">
+            PeepCode's Emberjs tutorial costs $12 bucks but is worth every penny
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://toranbillups.com/blog/">Toran Billups</a>
+          </td>
+          <td class="resourcedescription">
+            Toran has the best intro-to-ember materials around...in my opinion.
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://darthdeus.github.com">DarthDeus</a>
+          </td>
+          <td class="resourcedescription">
+            DarthDeus explains many of Ember's major systems
+          </td>
+        </tr>
+        <tr class="resource">
+          <td class="resourcetitle">
+            <a href="http://kaspertidemann.com">Kasper Tidemann</a>
+          </td>
+          <td class="resourcedescription">
+            Kasper's blog is short and sweet and includes helpful links and tutorials
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </content>
+  <footer>Contact <a href="https://twitter.com/stv_kn">stv_kn</a> to add your site.</footer>
+</details>
+</section>
+
+    
+      <h1 class="entry-title">Wrapping HTML5 Canvas With Ember View</h1>
+    
+    
+      <h6 class="meta">
+        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Steve Kane (@stv_kn)</span></span>
+
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-14T23:02:00-06:00" pubdate data-updated="true">Feb 14<span>th</span>, 2013</time>
+        
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/view/'>View</a>
+  
+</span>
+
+
+      </h6>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Dependency Versions</h2>
+
+<p>This post was built with Ember.js 1.0.0pre4, handlebars RC2, and jQuery 1.9.1</p>
+
+<h2>Understand The Goal</h2>
+
+<h3>What is Happening Here ?</h3>
+
+<p>We are going to use <strong>Ember.View</strong> to wrap an <strong>HTML5 &lt;canvas> element</strong>.  This will allow us to use the canvas API to draw shapes/data/whatever while utilizing Ember&#8217;s data structures, route handlers, and other bells/whistles that make it so great.</p>
+
+<h3>See Into the Future !</h3>
+
+<p>Cheat and check out this <a href="http://jsfiddle.net/skane/NyxkD/2/">Completed Fiddle</a> Or build your <a href="http://jsfiddle.net">Own Fiddle</a> as you learn.</p>
+
+<h2>Write Minimally Viable Ember Application (that does something)</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nx">Text</span> <span class="nx">to</span> <span class="nx">demonstrate</span> <span class="nx">App</span> <span class="nx">is</span> <span class="nx">functioning</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Where&#8217;s the Router    ? :-/</h3>
+
+<p>Ember generates a <strong>default router</strong> for us.  We are not changing routes so no need to explicitly declare it ourselves.</p>
+
+<h3>Why Define The Template    ? :-/</h3>
+
+<p>Primarily, we demonstrate our app&#8217;s validity.  Secondarily, we are going to modify this to be more useful in the next section.</p>
+
+<h2>Construct Canvas View, Modify application Template, Add CSS Border</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="c1">#attributes used to define and render the canvas </span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>  <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>  <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>  <span class="nv">color2: </span><span class="s">&quot;orange&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-handlebars&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nx">Text</span> <span class="nx">to</span> <span class="nx">demonstrate</span> <span class="nx">App</span> <span class="nx">is</span> <span class="nx">functioning</span>
+</span><span class='line'>  <span class="p">{{</span> <span class="nx">view</span> <span class="s1">&#39;App.Canvas&#39;</span> <span class="p">}}</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">canvas</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">border</span><span class="o">:</span> <span class="m">5px</span> <span class="k">solid</span> <span class="nb">black</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>What is the Meaning of &#8220;view App.Canvas&#8221;    ? :-/</h3>
+
+<p>This will create a new instance of the view <strong>App.Canvas</strong> and render it into the application template.  The view has the same context as the current template
+(in this case Ember has <strong>automagically generated applicationController</strong>).</p>
+
+<h3>And the Attributes    ? :-|</h3>
+
+<p><strong>AttributeBindings</strong> is an array of strings that references other attributes on the view.  It creates HTML attributes by those attribute names with the values stored
+in each attribute.  If the attributes change on the view, they will also change in the HTML.  We are using <strong>height</strong> and <strong>width</strong> in this manner and the resulting
+output is shown below.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;canvas</span> <span class="na">height=</span><span class="s">&quot;300&quot;</span> <span class="na">width=</span><span class="s">&quot;300&quot;</span><span class="nt">&gt;&lt;/canvas&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Attributes <strong>color1</strong> and <strong>color2</strong> are going to be used by our application to determine what colors to paint our canvas.  More on that to come&#8230;</p>
+
+<h2>Hook Into DOM Insertion and Design a Fill Method</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="c1">#attributes used to define and render the canvas</span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>  <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>  <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>  <span class="nv">color2: </span><span class="s">&quot;orange&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#this method is fired when this view&#39;s element is inserted in the DOM</span>
+</span><span class='line'>  <span class="nv">didInsertElement: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">fill: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="c1">#local variables for clarity</span>
+</span><span class='line'>    <span class="nv">halfHeight = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span class='line'>    <span class="nv">width = </span><span class="nx">@get</span> <span class="s">&quot;width&quot;</span>
+</span><span class='line'>    <span class="nv">c1 = </span><span class="nx">@get</span> <span class="s">&quot;color1&quot;</span>
+</span><span class='line'>    <span class="nv">c2 = </span><span class="nx">@get</span> <span class="s">&quot;color2&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#draw canvas parameters and methods (basic canvas api)</span>
+</span><span class='line'>    <span class="nv">ctx = </span><span class="nx">el</span><span class="p">.</span><span class="nx">getContext</span> <span class="s">&quot;2d&quot;</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c1</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c2</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">halfHeight</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>What Are These New Methods ?     (╯°□°)╯︵ ┻━┻</h3>
+
+<p><strong>didInsertElement</strong> is a method baked into Ember.View that fires when the view&#8217;s element (in our case, canvas) is inserted into the DOM.
+This method may be overridden to call our <strong>fill</strong> method initially.<br /><br />
+<strong>fill</strong> is a method that we have defined that uses the low-level canvas drawing API to color half the canvas orange
+ and half the canvas blue.  You can easily read about these methods on <a href="http://developer.mozilla.org">MDN</a> or
+a number of other references.</p>
+
+<h3>Draw Using Any Canvas API You Prefer !     ┬─┬ ノ(゜-゜ノ)</h3>
+
+<p>You could easily load one of many, many <a href="https://docs.google.com/spreadsheet/ccc?key=0Aqj_mVmuz3Y8dHNhUVFDYlRaaXlyX0xYSTVnalV5ZlE#gid=0">Canvas 2d Libraries</a>
+and use them to draw whatever you want in reaction to DOM events, user interaction, or even animations.</p>
+
+<h3>Tell Me More About this&#8230;Event Handling ! :-)</h3>
+
+<p>We can easily use the browser&#8217;s events such as <strong>click</strong>, <strong>doubleClick</strong>, <strong>mouseEnter</strong> etc to bind functions on our view to those events.  Ember provides method hooks
+for these events with obvious names.  A complete list of these is found <a href="https://emberjs.com/api/classes/Ember.View.html">Here</a>.</p>
+
+<h2>I Hold Tight To Your Hand As We Step Into This Brave New World</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">App = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.Canvas = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="c1">#attributes used to define and render the canvas</span>
+</span><span class='line'>  <span class="nv">tagName: </span><span class="s">&quot;canvas&quot;</span>
+</span><span class='line'>  <span class="nv">attributeBindings: </span><span class="p">[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">]</span>
+</span><span class='line'>  <span class="nv">height: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">width: </span><span class="mi">300</span>
+</span><span class='line'>  <span class="nv">color1: </span><span class="s">&quot;blue&quot;</span>
+</span><span class='line'>  <span class="nv">color2: </span><span class="s">&quot;orange&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#this method is fired when this view&#39;s element is inserted in the DOM</span>
+</span><span class='line'>  <span class="nv">didInsertElement: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="nx">@_super</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">@fill</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">fill: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+</span><span class='line'>    <span class="c1">#local variables for clarity</span>
+</span><span class='line'>    <span class="nv">halfHeight = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+</span><span class='line'>    <span class="nv">width = </span><span class="nx">@get</span> <span class="s">&quot;width&quot;</span>
+</span><span class='line'>    <span class="nv">c1 = </span><span class="nx">@get</span> <span class="s">&quot;color1&quot;</span>
+</span><span class='line'>    <span class="nv">c2 = </span><span class="nx">@get</span> <span class="s">&quot;color2&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#draw canvas parameters and methods (basic canvas api)</span>
+</span><span class='line'>    <span class="nv">ctx = </span><span class="nx">el</span><span class="p">.</span><span class="nx">getContext</span> <span class="s">&quot;2d&quot;</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c1</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span><span class='line'>    <span class="nv">ctx.fillStyle = </span><span class="nx">c2</span>
+</span><span class='line'>    <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">halfHeight</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">halfHeight</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#click event handler</span>
+</span><span class='line'>    <span class="nv">click: </span><span class="nf">(event)-&gt;</span>
+</span><span class='line'>      <span class="nv">c1 = </span><span class="nx">@get</span> <span class="s">&quot;color1&quot;</span>
+</span><span class='line'>      <span class="nv">c2 = </span><span class="nx">@get</span> <span class="s">&quot;color2&quot;</span>
+</span><span class='line'>      <span class="nx">@set</span> <span class="s">&quot;color1&quot;</span><span class="p">,</span> <span class="nx">c2</span>
+</span><span class='line'>      <span class="nx">@set</span> <span class="s">&quot;color2&quot;</span><span class="p">,</span> <span class="nx">c1</span>
+</span><span class='line'>      <span class="nx">@fill</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Click the Box Repeatedly To Feel that <a href="http://www.illinois.edu">Illini Pride</a></h3>
+
+<p>Our <strong>click</strong> event handles all browser click events that target our <strong>canvas</strong> and swaps the colors before calling <strong>fill</strong> again.<br/>
+Consider what else you might do with such an event handler: <br />
+<strong>mouseMove</strong> could be used to capture mouse coordinates and draw directly onto the canvas<br />
+<strong>keyDown</strong> could be used to capture keys and output printed text in the canvas<br />
+<strong>etc etc etc</strong><br />
+If you make an interesting feature and would like to share your fiddle, shoot me a tweet and I&#8217;ll append your fiddle to this blog post for others to learn from.</p>
+
+<h2>En Futuro</h2>
+
+<h3>Explore Options for Nested Canvas Elements</h3>
+
+<p>Nested canvas elements may be used as overlays on top of classical HTML elements which allows you to blend per-pixel drawing with standard HTML/CSS skills.</p>
+
+<h3>Explore Options for Using Advanced Canvas APIs</h3>
+
+<p>Advaned canvas APIs offer greater flexibility and higher-level abstractions useful for quickly producing impressive results.</p>
+
+<h3>Explore Options for Rendering Using WebGL (2d/3d)</h3>
+
+<p>WebGL is the bees knees and Ember.js has potential to weave together the rendering power of WebGL with Ember&#8217;s data management systems.  <strong>Ermagerd&#8230;werb GR ER</strong></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Steve Kane (@stv_kn)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-14T23:02:00-06:00" pubdate data-updated="true">Feb 14<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/view/'>View</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://stevekane.github.com/blog/2013/02/14/test-pos/" data-via="stv_kn" data-counturl="http://stevekane.github.com/blog/2013/02/14/test-pos/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/02/22/layered-canvases-with-css-extraction/" title="Next Post: Layering Canvases with Ember.ContainerView">Layering Canvases with Ember.ContainerView &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Peanut Gallery (with affection)</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" id="sitefooter"><p>
+  Copyright &copy; 2013 - 4South Studios -  
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'trialbyfire';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://stevekane.github.com/blog/2013/02/14/test-pos/';
+        var disqus_url = 'http://stevekane.github.com/blog/2013/02/14/test-pos/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
